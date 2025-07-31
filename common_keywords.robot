@@ -3,7 +3,7 @@ Library    SeleniumLibrary
 Variables    ../variables/data_reader.py
 
 *** Variables ***
-${USERNAME_LOCATOR}  id=user-name
+${USERNAME_LOCATOR}  id=username
 ${PASSWORD_LOCATOR}  id=password
 
 ${LOGIN_BUTTON_LOCATOR}  id=login-button
@@ -14,7 +14,7 @@ ${URL}  https://the-internet.herokuapp.com/login
 ${USERNAME}  tomsmith
 ${PASSWORD}  SuperSecretPassword!
 
-${MESSAGE}  tag=h3
+${MESSAGE}  id=flash
 
 # Locators for Product Page
 ${PRODUCT_TITLE_LOCATOR}  xpath=//*[@data-test='title']
