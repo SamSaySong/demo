@@ -9,10 +9,10 @@ ${PASSWORD_LOCATOR}  id=password
 ${LOGIN_BUTTON_LOCATOR}  id=login-button
 
 ${BROWSER}  Chrome
-${URL}  https://www.saucedemo.com/
+${URL}  https://the-internet.herokuapp.com/login
 
-# ${USERNAME}  tomsmith
-# ${PASSWORD}  SuperSecretPassword!
+${USERNAME}  tomsmith
+${PASSWORD}  SuperSecretPassword!
 
 ${MESSAGE}  tag=h3
 
