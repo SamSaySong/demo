@@ -15,9 +15,9 @@ ${SEARCH_BUTTON_LOCATOR}  xpath = /html/body/div[1]/div[3]/form/div[1]/div[1]/di
 ***Test Cases***
 Verify Google Search Functionality
     [Documentation]  This is my first test case
-    ${chrome_options_object}=    Evaluate    browser_options.get_chrome_options()    browser_options
+    # ${chrome_options_object}=    Evaluate    browser_options.get_chrome_options()    browser_options
 
-    Open Browser  ${URL}    ${BROWSER}    options=${chrome_options_object}
+    Open Browser  ${URL}    ${BROWSER}    options=${OPTIONS}
     Click Element  ${SEARCH_INPUT_LOCATOR}
     Input Text  ${SEARCH_INPUT_LOCATOR}  ${SEARCH_TEXT} 
     Click Element  xpath= /html/body/div[1]/div[2]/div
