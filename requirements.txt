@@ -1,7 +1,7 @@
-numpy==2.2.6
-openpyxl==3.1.5
+numpy
+openpyxl
 
-pandas==2.3.1
+pandas
 
 robotframework==7.3.1
 robotframework-pythonlibcore==4.4.1
