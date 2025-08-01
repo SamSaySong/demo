@@ -1,6 +1,6 @@
 ***Settings***
 Library    SeleniumLibrary
-Variables    ../variables/browser_options.py
+Variables    variables/browser_options.py
 
 *** Variables ***
 

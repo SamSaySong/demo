@@ -1,8 +1,8 @@
 ***Settings***
 Library    SeleniumLibrary
-Variables    ../variables/data_reader.py
-Variables    ../variables/browser_options.py
-Resource    ../common_keywords.robot
+Variables    variables/data_reader.py
+Variables    variables/browser_options.py
+Resource    common_keywords.robot
 
 
 
