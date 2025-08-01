@@ -33,11 +33,11 @@ def get_chrome_options_object():
     options.add_argument("--disable-popup-blocking")
     options.add_argument("--allow-running-insecure-content")
     options.add_argument('user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.181 Safari/537.36')
-    # # --- Thêm logic tạo thư mục user data tạm thời ---
-    # _temp_chrome_user_data_dir = tempfile.mkdtemp(prefix='chrome_profile_jenkins_')
-    # print(f"Using unique temporary Chrome user data directory: {_temp_chrome_user_data_dir}")
-    # options.add_argument(f"--user-data-dir={_temp_chrome_user_data_dir}")
-    # # ----------------------------------------------------
+    # --- Thêm logic tạo thư mục user data tạm thời ---
+    _temp_chrome_user_data_dir = tempfile.mkdtemp(prefix='chrome_profile_jenkins_')
+    print(f"Using unique temporary Chrome user data directory: {_temp_chrome_user_data_dir}")
+    options.add_argument(f"--user-data-dir={_temp_chrome_user_data_dir}")
+    # ----------------------------------------------------
     options.add_experimental_option("prefs", {
         "credentials_enable_service": False,
         "profile.password_manager_enabled": False,
