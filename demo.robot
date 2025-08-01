@@ -43,7 +43,7 @@ Clear and Quit Browser
     Cleanup Temp Chrome User Data Directory
 
 Setup test demo
-    ${CHROME_OPTIONS_OBJECT}=    Get Chrome Options Object
-    Open Browser    ${URL}    ${BROWSER}    options=${CHROME_OPTIONS_OBJECT}
+    ${options}=    Get Chrome Options
+    Open Browser    ${URL}    ${BROWSER}    options=${options}
    
     

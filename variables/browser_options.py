@@ -11,7 +11,7 @@ _temp_user_data_dir  = None
 _temp_firefox_user_data_dir = None
 
 
-def get_chrome_options_object():
+def get_chrome_options():
     
     # --- Thêm logic tạo thư mục user data tạm thời ---
     global _temp_user_data_dir
