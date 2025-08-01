@@ -39,8 +39,8 @@ Verify Unsuccessful Login
 
 *** Keywords ***
 Clear and Quit Browser
-    Cleanup Temp Chrome User Data Directory
     Close Browser    
+    Cleanup Temp Chrome User Data Directory
 
 Setup test demo
     ${CHROME_OPTIONS_OBJECT}=    Get Chrome Options Object

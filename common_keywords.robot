@@ -1,6 +1,6 @@
 ** Settings ***
 Library    SeleniumLibrary
-Variables    ../variables/data_reader.py
+Variables    variables/data_reader.py
 
 *** Variables ***
 ${USERNAME_LOCATOR}  id=username
