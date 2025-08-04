@@ -126,16 +126,22 @@ def get_chrome_options_object():
     return options
 
 # Hàm nội bộ để dọn dẹp thư mục tạm thời (giữ nguyên)
+# Trong file browser_options.py của bạn
+
 def _cleanup_temp_dir_function():
     global _temp_user_data_dir
     if _temp_user_data_dir and os.path.exists(_temp_user_data_dir):
         print(f"Attempting to cleanup temporary user data directory: {_temp_user_data_dir}")
         try:
-            shutil.rmtree(_temp_user_data_dir)
+            # Đảm bảo thư mục không bị khóa bởi các tiến trình khác
+            shutil.rmtree(_temp_user_data_dir, ignore_errors=True) # ignore_errors=True có thể giúp nhưng không phải là giải pháp gốc
             print(f"Successfully cleaned up temporary user data directory: {_temp_user_data_dir}")
         except Exception as e:
-            print(f"ERROR: Could not cleanup temp directory {_temp_user_data_dir}: {e}")
-    _temp_user_data_dir = None
+            # In ra lỗi chi tiết nếu không thể xóa thư mục
+            print(f"ERROR: Failed to cleanup temp directory {_temp_user_data_dir}: {e}")
+            # Không đặt _temp_user_data_dir = None ở đây nếu xóa thất bại,
+            # để lần chạy tiếp theo có thể cố gắng dọn dẹp lại hoặc báo lỗi rõ ràng.
+    _temp_user_data_dir = None # Luôn đặt lại biến sau khi cố gắng dọn dẹp
 
 # Hàm này sẽ trở thành từ khóa "Cleanup Chrome User Data Directory" trong Robot Framework (giữ nguyên)
 def cleanup_chrome_user_data_directory():
