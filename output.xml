@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot generator="Robot 7.3.1 (Python 3.10.4 on win32)" generated="2025-08-04T16:29:34.871312" rpa="false" schemaversion="5">
+<suite id="s1" name="Demo" source="d:\Training_Auto\traing_robot\demo.robot">
+<test id="s1-t1" name="Verify Unsuccessful Login" line="23">
+<kw name="Setup test demo" type="SETUP">
+<kw name="Get Chrome Options Object" owner="browser_options">
+<msg time="2025-08-04T16:29:35.697875" level="INFO">Created temporary user data directory: C:\Users\QC\AppData\Local\Temp\chrome_profile_g3eeq1je</msg>
+<msg time="2025-08-04T16:29:35.699875" level="INFO">${options} = &lt;selenium.webdriver.chrome.options.Options object at 0x000001C4FFD1A620&gt;</msg>
+<var>${options}</var>
+<doc>Tạo và trả về một đối tượng ChromeOptions đã cấu hình mạnh mẽ
+để tắt popup lưu mật khẩu và các thông báo khác,
+đặc biệt khi chạy headless trên Linux.</doc>
+<status status="PASS" start="2025-08-04T16:29:35.696875" elapsed="0.003000"/>
+</kw>
+<kw name="Open Browser" owner="SeleniumLibrary">
+<msg time="2025-08-04T16:29:35.700875" level="INFO">Opening browser 'Chrome' to base url 'https://the-internet.herokuapp.com/login'.</msg>
+<arg>${URL}</arg>
+<arg>${BROWSER}</arg>
+<arg>options=${options}</arg>
+<doc>Opens a new browser instance to the optional ``url``.</doc>
+<status status="PASS" start="2025-08-04T16:29:35.700875" elapsed="8.423378"/>
+</kw>
+<status status="PASS" start="2025-08-04T16:29:35.694875" elapsed="8.430378"/>
+</kw>
+<kw name="Login To Application" owner="common_keywords">
+<kw name="Input Text" owner="SeleniumLibrary">
+<msg time="2025-08-04T16:29:44.136255" level="INFO">Typing text 'tomsmith' into text field 'id=username'.</msg>
+<arg>${USERNAME_LOCATOR}</arg>
+<arg>${username}</arg>
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2025-08-04T16:29:44.135255" elapsed="0.134008"/>
+</kw>
+<kw name="Input Text" owner="SeleniumLibrary">
+<msg time="2025-08-04T16:29:44.270262" level="INFO">Typing text 'SuperSecretPassword!' into text field 'id=password'.</msg>
+<arg>${PASSWORD_LOCATOR}</arg>
+<arg>${password}</arg>
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2025-08-04T16:29:44.269263" elapsed="0.098182"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<msg time="2025-08-04T16:29:44.368448" level="INFO">Clicking element 'xpath=//*[@id="login"]/button'.</msg>
+<arg>${LOGIN_BUTTON_LOCATOR}</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="PASS" start="2025-08-04T16:29:44.367445" elapsed="0.081674"/>
+</kw>
+<kw name="Sleep" owner="BuiltIn">
+<msg time="2025-08-04T16:29:46.461711" level="INFO">Slept 2 seconds.</msg>
+<arg>2s</arg>
+<doc>Pauses the test executed for the given time.</doc>
+<status status="PASS" start="2025-08-04T16:29:44.449119" elapsed="2.013617"/>
+</kw>
+<arg>${USERNAME}</arg>
+<arg>${PASSWORD}</arg>
+<status status="PASS" start="2025-08-04T16:29:44.131254" elapsed="2.331482"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>xpath=//*[@id="content"]/div/a</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="PASS" start="2025-08-04T16:29:46.469744" elapsed="0.044098"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<msg time="2025-08-04T16:29:46.517843" level="INFO">Clicking element 'xpath=//*[@id="content"]/div/a'.</msg>
+<arg>xpath=//*[@id="content"]/div/a</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="PASS" start="2025-08-04T16:29:46.516843" elapsed="0.058567"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>locator=${MESSAGE}</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="PASS" start="2025-08-04T16:29:46.578410" elapsed="0.021913"/>
+</kw>
+<kw name="Element Should Contain" owner="SeleniumLibrary">
+<msg time="2025-08-04T16:29:46.731313" level="INFO" html="true">&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan="3"&gt;&lt;a href="selenium-screenshot-1.png"&gt;&lt;img src="selenium-screenshot-1.png" width="800px"&gt;&lt;/a&gt;</msg>
+<msg time="2025-08-04T16:29:46.731313" level="FAIL">Element 'id=flash' should have contained text 'You logged out of the secure area!' but its text was 'You logged into a secure area!
+×'.</msg>
+<arg>${MESSAGE}</arg>
+<arg>You logged out of the secure area!</arg>
+<doc>Verifies that element ``locator`` contains text ``expected``.</doc>
+<status status="FAIL" start="2025-08-04T16:29:46.603321" elapsed="0.129994">Element 'id=flash' should have contained text 'You logged out of the secure area!' but its text was 'You logged into a secure area!
+×'.</status>
+</kw>
+<kw name="Clear and Quit Browser" type="TEARDOWN">
+<kw name="Close Browser" owner="SeleniumLibrary">
+<doc>Closes the current browser.</doc>
+<status status="PASS" start="2025-08-04T16:29:46.741315" elapsed="2.226377"/>
+</kw>
+<kw name="Cleanup Chrome User Data Directory" owner="browser_options">
+<msg time="2025-08-04T16:29:49.074406" level="INFO">Attempting to cleanup temporary user data directory: C:\Users\QC\AppData\Local\Temp\chrome_profile_g3eeq1je
+Successfully cleaned up temporary user data directory: C:\Users\QC\AppData\Local\Temp\chrome_profile_g3eeq1je</msg>
+<status status="PASS" start="2025-08-04T16:29:48.967692" elapsed="0.106714"/>
+</kw>
+<status status="PASS" start="2025-08-04T16:29:46.740313" elapsed="2.334093"/>
+</kw>
+<doc>This test case verifies unsuccessful login functionality</doc>
+<status status="FAIL" start="2025-08-04T16:29:35.693875" elapsed="13.381532">Element 'id=flash' should have contained text 'You logged out of the secure area!' but its text was 'You logged into a secure area!
+×'.</status>
+</test>
+<status status="FAIL" start="2025-08-04T16:29:34.877323" elapsed="14.206096"/>
+</suite>
+<statistics>
+<total>
+<stat pass="0" fail="1" skip="0">All Tests</stat>
+</total>
+<tag>
+</tag>
+<suite>
+<stat name="Demo" id="s1" pass="0" fail="1" skip="0">Demo</stat>
+</suite>
+</statistics>
+<errors>
+</errors>
+</robot>

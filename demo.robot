@@ -42,10 +42,10 @@ Verify Unsuccessful Login
 *** Keywords ***
 Clear and Quit Browser
     Close Browser    
-    Cleanup Temp Chrome User Data Directory
+    Cleanup Chrome User Data Directory
 
 Setup test demo
-    ${options}=    Get Chrome Options
+    ${options}=    Get Chrome Options Object
     Open Browser    ${URL}    ${BROWSER}    options=${options}
    
     
