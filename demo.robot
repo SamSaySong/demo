@@ -41,7 +41,7 @@ Verify Unsuccessful Login
 
 *** Keywords ***
 Clear and Quit Browser
-    Close Browser    
+    Close All Browsers
     Cleanup Chrome User Data Directory
 
 Setup test demo
