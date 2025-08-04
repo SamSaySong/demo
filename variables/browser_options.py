@@ -34,7 +34,8 @@ def get_chrome_options_object():
     # -------------------------------------------------------------
     
     # Kích hoạt chế độ headless MỚI (Chrome 109+) - Cần thiết cho headless
-    options.add_argument("--headless=new") 
+    # options.add_argument("--headless=new") 
+    options.add_argument("--incognito") 
     # options.add_argument("--guest") # Chế độ khách, không cần đăng nhập
     
     
