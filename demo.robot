@@ -30,7 +30,9 @@ Verify Unsuccessful Login
     Login To Application    ${USERNAME}    ${PASSWORD}
     # ${welcome_text}=    Get Text    ${MESSAGE}
     # Log To Console  ${welcome_text}
+    Wait Until Element Is Visible    xpath=//*[@id="content"]/div/a
     Click Element    xpath=//*[@id="content"]/div/a
+    Wait Until Element Is Visible    locator=${MESSAGE}
     Element Should Contain  ${MESSAGE}  You logged out of the secure area!
     # Page Should Contain  You logged into a secure area!
     # [Teardown]  Clear and Quit Browser

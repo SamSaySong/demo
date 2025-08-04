@@ -95,7 +95,7 @@ pipeline {
         stage('Run Robot Tests') {
             steps {
                 echo 'Starting Robot Framework tests with demo.robot...'
-                sh "robot demo.robot"
+                sh "robot -d results demo.robot"
                 echo 'Robot Framework tests execution finished.'
             }
         }
