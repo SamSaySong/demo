@@ -71,24 +71,37 @@ pipeline {
             steps {
                 script {
                     echo "Downloading ChromeDriver..."
-                    // Bước 1: Lấy phiên bản chính của Chrome đã cài đặt trên server
+                    // Get the major version of Chrome installed on the server
                     def chromeVersion = sh(script: "google-chrome --version | cut -d ' ' -f3 | cut -d '.' -f1", returnStdout: true).trim()
-                    echo "Detected Chrome version: ${chromeVersion}"
+                    echo "Detected Chrome major version: ${chromeVersion}"
 
-                    // Bước 2: Lấy phiên bản ChromeDriver tương thích với phiên bản Chrome vừa tìm thấy
-                    def latestReleaseUrl = "https://storage.googleapis.com/chrome-for-testing-releases/LATEST_RELEASE_${chromeVersion}"
-                    sh "wget ${latestReleaseUrl} -O LATEST_RELEASE"
-                    def driverVersion = sh(script: "cat LATEST_RELEASE", returnStdout: true).trim()
-                    echo "Detected ChromeDriver version: ${driverVersion}"
+                    // Get the latest stable ChromeDriver version for the detected Chrome version using the JSON API
+                    def apiUrl = "https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions.json"
+                    def lastKnownGoodVersionsJson = sh(script: "wget -qO- ${apiUrl}", returnStdout: true).trim()
 
-                    // Bước 3: Tải xuống file zip của ChromeDriver, giải nén và cấp quyền
-                    def downloadUrl = "https://storage.googleapis.com/chrome-for-testing-releases/${driverVersion}/linux64/chromedriver-linux64.zip"
+                    // Parse the JSON to find the version that matches our Chrome version
+                    def matcher = lastKnownGoodVersionsJson =~ /"channel": "Stable",\s*"version": "(\d+\.\d+\.\d+\.\d+)"/
+                    if (!matcher) {
+                        error 'Could not find a stable version in the JSON output.'
+                    }
+                    def stableVersion = matcher[0][1]
+
+                    // Check if the stable version matches our major Chrome version
+                    def stableMajorVersion = stableVersion.tokenize('.')[0]
+                    if (stableMajorVersion != chromeVersion) {
+                        error "Mismatch: Chrome major version is ${chromeVersion}, but latest stable chromedriver is for version ${stableMajorVersion}. Please update your Chrome browser."
+                    }
+
+                    echo "Detected Stable ChromeDriver version: ${stableVersion}"
+
+                    // Download the ChromeDriver zip file
+                    def downloadUrl = "https://storage.googleapis.com/chrome-for-testing-releases/${stableVersion}/linux64/chromedriver-linux64.zip"
                     sh "wget ${downloadUrl} -O chromedriver.zip"
-                    sh "unzip -o chromedriver.zip" // Sử dụng -o để ghi đè nếu tồn tại
-                    sh "chmod +x ${env.CHROME_DRIVER_DIR}/chromedriver"
 
-                    // Bước 4: Thêm thư mục chứa ChromeDriver vào PATH của pipeline
-                    env.PATH = "${env.CHROME_DRIVER_DIR}:${env.PATH}"
+                    // Unzip, set permissions, and add to PATH
+                    sh "unzip -o chromedriver.zip"
+                    sh "chmod +x chromedriver-linux64/chromedriver"
+                    env.PATH = "${pwd()}/chromedriver-linux64:${env.PATH}"
                     echo "ChromeDriver has been placed in PATH for this pipeline run."
                 }
             }
