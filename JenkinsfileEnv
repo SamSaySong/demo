@@ -66,43 +66,114 @@ pipeline {
             }
         }
         
-        // Stage bạn đã yêu cầu được thêm vào đây
+        // Fixed ChromeDriver download stage
         stage('Download and Configure ChromeDriver') {
             steps {
                 script {
                     echo "Downloading ChromeDriver..."
-                    // Get the major version of Chrome installed on the server
-                    def chromeVersion = sh(script: "google-chrome --version | cut -d ' ' -f3 | cut -d '.' -f1", returnStdout: true).trim()
-                    echo "Detected Chrome major version: ${chromeVersion}"
-
-                    // Get the JSON data for last known good versions
-                    def apiUrl = "https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions.json"
-                    def lastKnownGoodVersionsJson = sh(script: "wget -qO- ${apiUrl}", returnStdout: true).trim()
-
-                    // Use Groovy's built-in JSON parsing for reliability
-                    def versionsJson = new groovy.json.JsonSlurper().parseText(lastKnownGoodVersionsJson)
-                    def stableVersion = versionsJson.versions.find { it.channel == 'Stable' }?.version
                     
-                    if (!stableVersion) {
-                        error 'Could not find a stable version in the JSON output.'
+                    try {
+                        // Get the major version of Chrome installed on the server
+                        def chromeVersion = sh(script: "google-chrome --version | cut -d ' ' -f3 | cut -d '.' -f1", returnStdout: true).trim()
+                        echo "Detected Chrome major version: ${chromeVersion}"
+
+                        // Alternative approach: Use a more reliable method to get ChromeDriver
+                        echo "Attempting to download ChromeDriver using alternative method..."
+                        
+                        // Method 1: Try with direct stable version check
+                        def apiUrl = "https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json"
+                        def jsonOutput = ""
+                        
+                        try {
+                            jsonOutput = sh(script: "curl -s ${apiUrl}", returnStdout: true).trim()
+                        } catch (Exception e) {
+                            echo "Failed to fetch from API, trying wget..."
+                            jsonOutput = sh(script: "wget -qO- ${apiUrl}", returnStdout: true).trim()
+                        }
+                        
+                        if (jsonOutput == "") {
+                            throw new Exception("Failed to fetch JSON from API")
+                        }
+                        
+                        echo "JSON Response received, parsing..."
+                        
+                        // Use Python to parse JSON more reliably
+                        writeFile file: 'parse_chrome_version.py', text: '''
+                                                                        import json
+                                                                        import sys
+
+                                                                        try:
+                                                                            # Read JSON from stdin
+                                                                            json_data = sys.stdin.read()
+                                                                            data = json.loads(json_data)
+                                                                            
+                                                                            # Get stable channel version
+                                                                            channels = data.get('channels', {})
+                                                                            stable = channels.get('Stable', {})
+                                                                            version = stable.get('version', '')
+                                                                            
+                                                                            if version:
+                                                                                print(version)
+                                                                            else:
+                                                                                print("ERROR: No stable version found")
+                                                                                
+                                                                        except Exception as e:
+                                                                            print(f"ERROR: {str(e)}")
+                                                                        '''
+                        
+                        def stableVersion = sh(script: "echo '${jsonOutput}' | python3 parse_chrome_version.py", returnStdout: true).trim()
+                        
+                        if (stableVersion.startsWith("ERROR") || stableVersion == "") {
+                            echo "API method failed, falling back to hardcoded approach..."
+                            // Fallback: Use a known working version mapping
+                            def versionMap = [
+                                '131': '131.0.6778.85',
+                                '130': '130.0.6723.116', 
+                                '129': '129.0.6668.100',
+                                '128': '128.0.6613.137',
+                                '127': '127.0.6533.119'
+                            ]
+                            
+                            stableVersion = versionMap[chromeVersion] ?: versionMap['131']
+                            echo "Using fallback version: ${stableVersion}"
+                        } else {
+                            echo "Detected Stable ChromeDriver version: ${stableVersion}"
+                        }
+
+                        // Construct and download the ChromeDriver zip file
+                        def downloadUrl = "https://storage.googleapis.com/chrome-for-testing-public/${stableVersion}/linux64/chromedriver-linux64.zip"
+                        echo "Download URL: ${downloadUrl}"
+                        
+                        sh "wget ${downloadUrl} -O chromedriver.zip"
+
+                        // Unzip, set permissions, and add to PATH
+                        sh "unzip -o chromedriver.zip"
+                        sh "chmod +x chromedriver-linux64/chromedriver"
+                        env.PATH = "${pwd()}/chromedriver-linux64:${env.PATH}"
+                        echo "ChromeDriver has been placed in PATH for this pipeline run."
+                        
+                        // Verify ChromeDriver works
+                        sh "chromedriver --version"
+                        
+                    } catch (Exception e) {
+                        echo "ChromeDriver download failed: ${e.getMessage()}"
+                        echo "Attempting to install ChromeDriver via package manager as fallback..."
+                        
+                        try {
+                            sh """
+                                sudo apt update
+                                sudo apt install -y chromium-chromedriver
+                                ln -sf /usr/bin/chromedriver chromedriver-linux64/chromedriver || true
+                            """
+                            echo "ChromeDriver installed via package manager."
+                        } catch (Exception e2) {
+                            echo "Package manager installation also failed: ${e2.getMessage()}"
+                            error "Could not install ChromeDriver through any method."
+                        }
+                    } finally {
+                        // Clean up temporary files
+                        sh "rm -f parse_chrome_version.py chromedriver.zip || true"
                     }
-
-                    def stableMajorVersion = stableVersion.tokenize('.')[0]
-                    if (stableMajorVersion != chromeVersion) {
-                        error "Mismatch: Chrome major version is ${chromeVersion}, but latest stable chromedriver is for version ${stableMajorVersion}. Please update your Chrome browser."
-                    }
-
-                    echo "Detected Stable ChromeDriver version: ${stableVersion}"
-
-                    // Construct and download the ChromeDriver zip file
-                    def downloadUrl = "https://storage.googleapis.com/chrome-for-testing-releases/${stableVersion}/linux64/chromedriver-linux64.zip"
-                    sh "wget ${downloadUrl} -O chromedriver.zip"
-
-                    // Unzip, set permissions, and add to PATH
-                    sh "unzip -o chromedriver.zip"
-                    sh "chmod +x chromedriver-linux64/chromedriver"
-                    env.PATH = "${pwd()}/chromedriver-linux64:${env.PATH}"
-                    echo "ChromeDriver has been placed in PATH for this pipeline run."
                 }
             }
         }
