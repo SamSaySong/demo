@@ -75,18 +75,18 @@ pipeline {
                     def chromeVersion = sh(script: "google-chrome --version | cut -d ' ' -f3 | cut -d '.' -f1", returnStdout: true).trim()
                     echo "Detected Chrome major version: ${chromeVersion}"
 
-                    // Get the latest stable ChromeDriver version for the detected Chrome version using the JSON API
+                    // Get the JSON data for last known good versions
                     def apiUrl = "https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions.json"
                     def lastKnownGoodVersionsJson = sh(script: "wget -qO- ${apiUrl}", returnStdout: true).trim()
 
-                    // Parse the JSON to find the version that matches our Chrome version
-                    def matcher = lastKnownGoodVersionsJson =~ /"channel": "Stable",\s*"version": "(\d+\.\d+\.\d+\.\d+)"/
-                    if (!matcher) {
+                    // Use Groovy's built-in JSON parsing for reliability
+                    def versionsJson = new groovy.json.JsonSlurper().parseText(lastKnownGoodVersionsJson)
+                    def stableVersion = versionsJson.versions.find { it.channel == 'Stable' }?.version
+                    
+                    if (!stableVersion) {
                         error 'Could not find a stable version in the JSON output.'
                     }
-                    def stableVersion = matcher[0][1]
 
-                    // Check if the stable version matches our major Chrome version
                     def stableMajorVersion = stableVersion.tokenize('.')[0]
                     if (stableMajorVersion != chromeVersion) {
                         error "Mismatch: Chrome major version is ${chromeVersion}, but latest stable chromedriver is for version ${stableMajorVersion}. Please update your Chrome browser."
@@ -94,7 +94,7 @@ pipeline {
 
                     echo "Detected Stable ChromeDriver version: ${stableVersion}"
 
-                    // Download the ChromeDriver zip file
+                    // Construct and download the ChromeDriver zip file
                     def downloadUrl = "https://storage.googleapis.com/chrome-for-testing-releases/${stableVersion}/linux64/chromedriver-linux64.zip"
                     sh "wget ${downloadUrl} -O chromedriver.zip"
 
