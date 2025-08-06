@@ -34,8 +34,8 @@ def get_chrome_options_object():
     # -------------------------------------------------------------
     
     # Kích hoạt chế độ headless MỚI (Chrome 109+) - Cần thiết cho headless
-    # options.add_argument("--headless=new") 
-    options.add_argument("--incognito") 
+    options.add_argument("--headless=new") 
+    # options.add_argument("--incognito") 
     # options.add_argument("--guest") # Chế độ khách, không cần đăng nhập
     
     
@@ -115,14 +115,14 @@ def get_chrome_options_object():
     # Đây là cờ rất mạnh mẽ để chạy Chrome mà không liên kết với bất kỳ tài khoản Google nào.
     # Thường thì các popup "Change your password" xuất hiện khi Chrome đang cố gắng
     # đồng bộ hóa với tài khoản Google hoặc quản lý mật khẩu của Google.
-    options.add_argument("--bwsi") 
+    # options.add_argument("--bwsi") 
 
     # Chiến lược 2: Vô hiệu hóa các tính năng qua cờ (Features) - Ít dùng nhưng đôi khi hiệu quả
-    # options.add_argument("--disable-features=PasswordManagerV2") 
-    # options.add_argument("--disable-features=AutofillPasswordGeneration")
-    # options.add_argument("--disable-features=SafeBrowse") # Có thể tắt nhưng có rủi ro bảo mật
-    # options.add_argument("--disable-background-networking") # Ngăn chặn các hoạt động nền không cần thiết
-    # options.add_argument("--disable-default-browser-check") # Ngăn Chrome hỏi có phải trình duyệt mặc định không
+    options.add_argument("--disable-features=PasswordManagerV2") 
+    options.add_argument("--disable-features=AutofillPasswordGeneration")
+    options.add_argument("--disable-features=SafeBrowse") # Có thể tắt nhưng có rủi ro bảo mật
+    options.add_argument("--disable-background-networking") # Ngăn chặn các hoạt động nền không cần thiết
+    options.add_argument("--disable-default-browser-check") # Ngăn Chrome hỏi có phải trình duyệt mặc định không
 
     return options
 
@@ -147,3 +147,16 @@ def _cleanup_temp_dir_function():
 # Hàm này sẽ trở thành từ khóa "Cleanup Chrome User Data Directory" trong Robot Framework (giữ nguyên)
 def cleanup_chrome_user_data_directory():
     _cleanup_temp_dir_function()
+    
+    
+def quit_browser():
+    """
+    Từ khóa Robot Framework để đóng trình duyệt Chrome.
+    """
+    from selenium import webdriver
+    try:
+        driver = webdriver.Chrome(options=get_chrome_options_object())
+        driver.quit()
+        print("Browser closed successfully.")
+    except Exception as e:
+        print(f"Error closing browser: {e}")

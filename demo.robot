@@ -41,7 +41,7 @@ Verify Unsuccessful Login
 
 *** Keywords ***
 Clear and Quit Browser
-    Close All Browsers
+    Quit Browser
     Sleep    1s 
     Cleanup Chrome User Data Directory
 
