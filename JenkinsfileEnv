@@ -73,17 +73,19 @@ pipeline {
                     echo "Downloading ChromeDriver..."
                     def chromeVersion = ""
                     try {
-                        // Cố gắng lấy phiên bản Chrome
                         chromeVersion = sh(script: "google-chrome --version | cut -d ' ' -f3 | cut -d '.' -f1", returnStdout: true).trim()
                     } catch (Exception e) {
-                        echo "Warning: Cannot detect Google Chrome version. This may cause issues. Using fallback."
-                        chromeVersion = "131" // Phiên bản fallback nếu không thể phát hiện
+                        echo "Warning: Cannot detect Google Chrome version. Using fallback."
+                        chromeVersion = "131"
                     }
                     echo "Detected Chrome major version: ${chromeVersion}"
 
-                    // Lấy JSON data và parsing bằng Groovy
                     def apiUrl = "https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json"
-                    def versionsJson = new groovy.json.JsonSlurper().parse(new URL(apiUrl).newReader())
+                    
+                    // Sử dụng lệnh curl để lấy JSON, đây là phương thức an toàn hơn
+                    def jsonOutput = sh(script: "curl -s ${apiUrl}", returnStdout: true).trim()
+                    
+                    def versionsJson = new groovy.json.JsonSlurper().parseText(jsonOutput)
                     def stableVersionEntry = versionsJson.channels.Stable
                     
                     if (!stableVersionEntry) {
@@ -96,16 +98,12 @@ pipeline {
                     echo "Detected Stable ChromeDriver version: ${stableVersion}"
                     echo "Download URL: ${downloadUrl}"
 
-                    // Download the ChromeDriver zip file
                     sh "wget ${downloadUrl} -O chromedriver.zip"
-                    
-                    // Unzip, set permissions, and add to PATH
                     sh "unzip -o chromedriver.zip"
                     sh "chmod +x chromedriver-linux64/chromedriver"
                     env.PATH = "${pwd()}/chromedriver-linux64:${env.PATH}"
                     echo "ChromeDriver has been placed in PATH for this pipeline run."
                     
-                    // Verify ChromeDriver works
                     sh "chromedriver --version"
                 }
             }
