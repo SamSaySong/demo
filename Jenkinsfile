@@ -1,4 +1,4 @@
-// Script pipline đã cài đặt chrome tại Agent Jenkins
+// Script pipeline đã cài đặt chrome tại Agent Jenkins
 // và sử dụng Robot Framework để chạy các bài kiểm tra tự động.
 
 pipeline {
@@ -41,28 +41,39 @@ pipeline {
                     def pythonVersionOutput = sh(script: "${env.PYTHON_CMD} --version", returnStdout: true).trim()
                     echo "Sử dụng Python: ${pythonVersionOutput}"
 
-                    sh "${env.PYTHON_CMD} -m venv ${env.VENV_DIR}"
-
-                    env.VIRTUAL_ENV_BIN = "${pwd()}/${env.VENV_DIR}/bin"
-                    env.PATH = "${env.VIRTUAL_ENV_BIN}:${env.PATH}"
-                    echo "Virtualenv: ${env.VIRTUAL_ENV_BIN}"
+                    sh "rm -rf ${VENV_DIR}"
+                    sh "${env.PYTHON_CMD} -m venv ${VENV_DIR}"
                 }
             }
         }
 
         stage('Install Dependencies') {
             steps {
-                echo 'Installing dependencies from requirements.txt into the virtual environment...'
-                script {
-                    sh "pip install --upgrade pip"
-
-                    if (fileExists('requirements.txt')) {
-                        sh "pip install -r requirements.txt"
-                        echo "Dependencies from requirements.txt installed successfully."
-                    } else {
-                        echo "Warning: requirements.txt not found. Skipping."
-                    }
-                }
+                echo 'Installing dependencies into the virtual environment...'
+                sh """
+                    # Kích hoạt môi trường ảo
+                    . ${VENV_DIR}/bin/activate
+                    
+                    # Cài đặt pip mới nhất
+                    pip install --upgrade pip
+        
+                    # Kiểm tra và cài đặt từ requirements.txt nếu tồn tại, nếu không thì cài đặt thủ công
+                    if [ -f requirements.txt ]; then
+                        echo "Installing dependencies from requirements.txt..."
+                        pip install -r requirements.txt
+                    else
+                        echo "Warning: requirements.txt not found. Installing default dependencies."
+                        pip install robotframework robotframework-seleniumlibrary
+                    fi
+        
+                    # Kiểm tra xem robot đã được cài đặt thành công chưa
+                    # Sử dụng '|| true' để ngăn Jenkins báo lỗi khi mã lỗi là 251
+                    robot --version || true
+        
+                    # Hủy kích hoạt môi trường ảo
+                    deactivate
+                """
+                echo 'Dependencies installed and verified.'
             }
         }
 
@@ -93,6 +104,7 @@ pipeline {
                     echo "Download URL: ${downloadUrl}"
 
                     sh """
+                        rm -rf chromedriver.zip chromedriver-linux64 bin || true
                         wget -q ${downloadUrl} -O chromedriver.zip
                         unzip -o chromedriver.zip
                         chmod +x chromedriver-linux64/chromedriver
@@ -107,12 +119,24 @@ pipeline {
         }
 
         stage('Run Robot Tests') {
-            steps {
-                echo 'Starting Robot Framework tests with demo.robot...'
-                sh "robot -d results demo.robot"
-                echo 'Robot Framework tests execution finished.'
-            }
-        }
+                    steps {
+                        echo 'Starting Robot Framework tests with demo.robot...'
+                        sh """
+                            # Kích hoạt môi trường ảo
+                            . ${env.VENV_DIR}/bin/activate
+                            
+                            # Cài đặt biến môi trường DISPLAY cho trình duyệt headless
+                            export DISPLAY=:99
+        
+                            # Chạy bài kiểm tra Robot Framework bằng đường dẫn tuyệt đối
+                            ${env.WORKSPACE}/${env.VENV_DIR}/bin/robot -d results demo.robot
+        
+                            # Hủy kích hoạt môi trường ảo sau khi hoàn tất
+                            deactivate
+                        """
+                        echo 'Robot Framework tests execution finished.'
+                    }
+                }
     }
 
     post {
