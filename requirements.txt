@@ -7,9 +7,6 @@ openpyxl==3.1.5
 pandas==2.3.1
 psutil==5.9.8
 requests==2.32.4
-robotframework-pythonlibcore==4.4.1
 robotframework-requests==0.9.7
-robotframework-sapguilibrary==1.1
 robotframework-seleniumlibrary==6.7.1
-robotframework-seleniumtestability==2.1.0
 selenium==4.15.2
