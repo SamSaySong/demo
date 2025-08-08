@@ -1,44 +1,36 @@
+// install Python 3.10, create a virtual environment, install dependencies, and run Robot Framework tests
+// Cài đặt version python, install chrome nếu agent chưa được cài đặt, tạo môi trường ảo, cài đặt dependencies và chạy Robot Framework tests
 pipeline {
     agent any
 
     environment {
         PYTHON_VERSION_TO_INSTALL = '3.10'
-        PYTHON_CMD = "python${env.PYTHON_VERSION_TO_INSTALL}"
-        VENV_DIR = "venv_robot_project_py${env.PYTHON_VERSION_TO_INSTALL}"
+        PYTHON_CMD = "python3.10"
+        VENV_DIR = "venv_robot_project_py3.10"
     }
 
     stages {
         stage('Setup Environment and Clone Code') {
             steps {
                 echo 'Starting pipeline setup...'
-                
-                // Clone the Git repository
+
                 echo 'Cloning the Git repository...'
-                git branch: 'main', url: 'https://github.com/SamSaySong/demo.git' 
+                git branch: 'main', url: 'https://github.com/SamSaySong/demo.git'
                 sh 'ls -la'
-                
-                // Check and Install Python
+
                 echo "Checking for Python ${env.PYTHON_VERSION_TO_INSTALL}..."
                 script {
                     def pythonExists = sh(script: "command -v ${env.PYTHON_CMD}", returnStatus: true) == 0
-
                     if (!pythonExists) {
-                        echo "Python ${env.PYTHON_VERSION_TO_INSTALL} not found. Attempting to install..."
-                        def defaultPython3Version = sh(script: "python3 --version || true", returnStdout: true).trim()
-                        if (defaultPython3Version.startsWith("Python ${env.PYTHON_VERSION_TO_INSTALL}")) {
-                            echo "Python3 is already version ${env.PYTHON_VERSION_TO_INSTALL}. Using 'python3' command."
-                            env.PYTHON_CMD = 'python3'
-                        } else {
-                            echo "Warning: Sudo installation requires pre-configured privileges. If this fails, please configure your Jenkins agent."
-                            sh """
-                                sudo apt update
-                                sudo apt install -y software-properties-common
-                                sudo add-apt-repository -y ppa:deadsnakes/ppa
-                                sudo apt update
-                                sudo apt install -y ${env.PYTHON_CMD} ${env.PYTHON_CMD}-venv
-                                echo "Python ${env.PYTHON_VERSION_TO_INSTALL} and venv installed successfully."
-                            """
-                        }
+                        echo "Warning: Python ${env.PYTHON_VERSION_TO_INSTALL} not found. Attempting to install..."
+                        sh """
+                            sudo apt update
+                            sudo apt install -y software-properties-common
+                            sudo add-apt-repository -y ppa:deadsnakes/ppa
+                            sudo apt update
+                            sudo apt install -y ${env.PYTHON_CMD} ${env.PYTHON_CMD}-venv
+                            echo "Python ${env.PYTHON_VERSION_TO_INSTALL} and venv installed successfully."
+                        """
                     } else {
                         echo "Python ${env.PYTHON_VERSION_TO_INSTALL} is already installed."
                     }
@@ -46,51 +38,45 @@ pipeline {
                     echo "Using Python: ${pythonVersionOutput}"
                 }
 
-                // Create a temporary virtual environment
-                echo "Creating temporary virtual environment '${VENV_DIR}'..."
+                echo "Creating temporary virtual environment '${env.VENV_DIR}'..."
                 sh "${env.PYTHON_CMD} -m venv ${env.VENV_DIR}"
-                env.PATH = "${pwd()}/${env.VENV_DIR}/bin:${env.PATH}"
-                echo "Virtual environment created and added to PATH."
             }
         }
-        
+
         stage('Download and Install Dependencies') {
             steps {
                 script {
                     echo 'Installing dependencies into the virtual environment...'
-                    sh "pip install --upgrade pip"
+                    sh "${env.VENV_DIR}/bin/pip install --upgrade pip"
+
                     if (fileExists('requirements.txt')) {
-                        sh "pip install -r requirements.txt"
+                        sh "${env.VENV_DIR}/bin/pip install -r requirements.txt"
                         echo "Dependencies from requirements.txt installed successfully."
                     } else {
                         echo "Warning: requirements.txt not found. Skipping."
                     }
-                    sh "pip install robotframework robotframework-seleniumlibrary"
+
+                    sh "${env.VENV_DIR}/bin/pip install robotframework robotframework-seleniumlibrary"
                     echo "Core dependencies installed."
 
-                    // Download ChromeDriver and configure
-                    echo "Downloading and configuring ChromeDriver..."
-                    def chromeVersion = ""
-                    try {
-                        chromeVersion = sh(script: "google-chrome --version | cut -d ' ' -f3 | cut -d '.' -f1", returnStdout: true).trim()
-                    } catch (Exception e) {
-                        echo "Warning: Cannot detect Google Chrome version. Using fallback version."
-                        chromeVersion = "138" // Use a known stable version
-                    }
-                    echo "Detected Chrome major version: ${chromeVersion}"
+                    echo "Installing Google Chrome browser..."
+                    sh """
+                        wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+                        sudo apt install -y ./google-chrome-stable_current_amd64.deb
+                        google-chrome --version
+                    """
 
+                    echo "Downloading and configuring ChromeDriver..."
                     def apiUrl = "https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json"
                     def jsonOutput = sh(script: "curl -s ${apiUrl}", returnStdout: true).trim()
-                    
-                    // The JsonSlurper call and all subsequent operations must be in a single script block.
-                    // This prevents the LazyMap from being serialized across stages.
+
                     def versionsJson = new groovy.json.JsonSlurper().parseText(jsonOutput)
                     def stableVersionEntry = versionsJson.channels.Stable
-                    
+
                     if (!stableVersionEntry) {
                         error 'Could not find a stable version in the JSON output.'
                     }
-                    
+
                     def downloadUrl = stableVersionEntry.downloads.chromedriver.find { it.platform == 'linux64' }.url
                     echo "Download URL: ${downloadUrl}"
 
@@ -98,10 +84,12 @@ pipeline {
                         wget ${downloadUrl} -O chromedriver.zip
                         unzip -o chromedriver.zip
                         chmod +x chromedriver-linux64/chromedriver
+
+                        sudo mv chromedriver-linux64/chromedriver /usr/local/bin/chromedriver
+                        sudo chmod +x /usr/local/bin/chromedriver
+
+                        chromedriver --version
                     """
-                    env.PATH = "${pwd()}/chromedriver-linux64:${env.PATH}"
-                    echo "ChromeDriver has been placed in PATH for this pipeline run."
-                    sh "chromedriver --version"
                 }
             }
         }
@@ -109,7 +97,8 @@ pipeline {
         stage('Run Robot Tests') {
             steps {
                 echo 'Starting Robot Framework tests with demo.robot...'
-                sh "robot -d results demo.robot"
+                // Gọi robot từ virtual environment
+                sh "${env.VENV_DIR}/bin/robot -d results demo.robot"
                 echo 'Robot Framework tests execution finished.'
             }
         }
@@ -119,7 +108,7 @@ pipeline {
         always {
             echo 'Pipeline finished.'
             sh "rm -rf ${env.VENV_DIR} || true"
-            sh "rm -rf ${pwd()}/chromedriver-linux64 || true"
+            sh "rm -rf chromedriver-linux64 || true"
             sh "rm -f chromedriver.zip || true"
             sh "find . -name '*.pyc' -delete || true"
             sh "find . -name '__pycache__' -type d -exec rm -rf {} + || true"

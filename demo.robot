@@ -41,12 +41,15 @@ Verify Unsuccessful Login
 
 *** Keywords ***
 Clear and Quit Browser
-    Quit Browser
+    Close Browser
     Sleep    1s 
     Cleanup Chrome User Data Directory
 
 Setup test demo
     ${options}=    Get Chrome Options Object
-    Open Browser    ${URL}    ${BROWSER}    options=${options}
+    # Create Webdriver    driver_name    ${BROWSER}    options=${options}
+    # Open Browser    ${URL}    ${BROWSER}    options=${options}
+    Create Webdriver    ${BROWSER}    options=${options}
+    Go To               ${URL}
    
     

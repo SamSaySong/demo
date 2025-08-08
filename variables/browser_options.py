@@ -3,7 +3,7 @@ import os
 import shutil
 import tempfile
 import atexit
-
+from selenium import webdriver
 _temp_user_data_dir = None
 
 def get_chrome_options_object():
@@ -49,7 +49,7 @@ def get_chrome_options_object():
     options.add_argument("--disable-gpu") # Rất quan trọng cho headless trên Linux, tránh lỗi render
 
     # Kích thước cửa sổ và tối đa hóa (đảm bảo hiển thị đầy đủ các phần tử)
-    options.add_argument("--window-size=1920,1080")
+    # options.add_argument("--window-size=1920,1080")
     options.add_argument("--start-maximized") 
 
     # Các tùy chọn vô hiệu hóa và khắc phục sự cố chung
@@ -67,7 +67,6 @@ def get_chrome_options_object():
     # Arguments để ẩn dấu hiệu tự động hóa (rất quan trọng để tránh bị phát hiện là bot)
     options.add_argument("--disable-blink-features=AutomationControlled")
     options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36") # Cập nhật lên Chrome 137+ của bạn nếu có
-    # Ví dụ User-Agent cho Chrome 137 (bạn có thể tìm trên trang chrome://version/ của mình)
     # options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36")
 
 
@@ -90,7 +89,6 @@ def get_chrome_options_object():
     })
     
     # Các switches để loại bỏ hành vi tự động hóa và lời nhắc cụ thể
-    # Đã thêm nhiều switch hơn để đảm bảo vô hiệu hóa mọi cơ chế liên quan
     options.add_experimental_option("excludeSwitches", [
         "enable-automation", 
         "enable-logging",
@@ -111,11 +109,9 @@ def get_chrome_options_object():
     # Các chiến lược bổ sung (Thử từng cái một nếu vẫn không được)
     # -------------------------------------------------------------
 
-    # Chiến lược 1: Chế độ Browser Without Sign-In (CÔ LẬP TÀI KHOẢN GOOGLE)
-    # Đây là cờ rất mạnh mẽ để chạy Chrome mà không liên kết với bất kỳ tài khoản Google nào.
     # Thường thì các popup "Change your password" xuất hiện khi Chrome đang cố gắng
-    # đồng bộ hóa với tài khoản Google hoặc quản lý mật khẩu của Google.
-    # options.add_argument("--bwsi") 
+
+    options.add_argument("--bwsi") # Chế độ Browser Without Sign-In (CÔ LẬP TÀI KHOẢN GOOGLE)
 
     # Chiến lược 2: Vô hiệu hóa các tính năng qua cờ (Features) - Ít dùng nhưng đôi khi hiệu quả
     options.add_argument("--disable-features=PasswordManagerV2") 
@@ -123,11 +119,9 @@ def get_chrome_options_object():
     options.add_argument("--disable-features=SafeBrowse") # Có thể tắt nhưng có rủi ro bảo mật
     options.add_argument("--disable-background-networking") # Ngăn chặn các hoạt động nền không cần thiết
     options.add_argument("--disable-default-browser-check") # Ngăn Chrome hỏi có phải trình duyệt mặc định không
-
+    
+   
     return options
-
-# Hàm nội bộ để dọn dẹp thư mục tạm thời (giữ nguyên)
-# Trong file browser_options.py của bạn
 
 def _cleanup_temp_dir_function():
     global _temp_user_data_dir
@@ -149,14 +143,3 @@ def cleanup_chrome_user_data_directory():
     _cleanup_temp_dir_function()
     
     
-def quit_browser():
-    """
-    Từ khóa Robot Framework để đóng trình duyệt Chrome.
-    """
-    from selenium import webdriver
-    try:
-        driver = webdriver.Chrome(options=get_chrome_options_object())
-        driver.quit()
-        print("Browser closed successfully.")
-    except Exception as e:
-        print(f"Error closing browser: {e}")
