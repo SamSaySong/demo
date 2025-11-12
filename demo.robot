@@ -49,7 +49,7 @@ Setup test demo
     ${options}=    Get Chrome Options Object
     # Create Webdriver    driver_name    ${BROWSER}    options=${options}
     # Open Browser    ${URL}    ${BROWSER}    options=${options}
-    Create Webdriver    ${BROWSER}    options=${options}
-    Go To               ${URL}
+
+    Open Browser    %{BASE_URL}    ${BROWSER}    options=${options}
    
     

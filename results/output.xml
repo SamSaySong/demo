@@ -1,34 +1,209 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<robot generator="Robot 7.3.1 (Python 3.10.4 on win32)" generated="2025-06-30T11:16:28.305962" rpa="false" schemaversion="5">
-<suite id="s1" name="Testing" source="d:\traing_robot\testing.robot">
-<test id="s1-t1" name="Open Browser And Navigate" line="6">
+<robot generator="Robot 7.3.2 (Python 3.10.4 on linux)" generated="2025-11-11T09:31:49.602250" rpa="false" schemaversion="5">
+<suite id="s1" name="Demo" source="/app/demo.robot">
+<test id="s1-t1" name="Verify Successful Login" line="11">
+<kw name="Setup test demo" type="SETUP">
+<kw name="Get Chrome Options Object" owner="browser_options">
+<msg time="2025-11-11T09:31:50.043132" level="INFO">Created temporary user data directory: /tmp/chrome_profile_7qz7w4ny</msg>
+<msg time="2025-11-11T09:31:50.043258" level="INFO">${options} = &lt;selenium.webdriver.chrome.options.Options object at 0x766d5c60ca90&gt;</msg>
+<var>${options}</var>
+<doc>Tạo và trả về một đối tượng ChromeOptions đã cấu hình mạnh mẽ
+để tắt popup lưu mật khẩu và các thông báo khác,
+đặc biệt khi chạy headless trên Linux.</doc>
+<status status="PASS" start="2025-11-11T09:31:50.042498" elapsed="0.000798"/>
+</kw>
 <kw name="Open Browser" owner="SeleniumLibrary">
-<msg time="2025-06-30T11:16:28.749209" level="INFO">Opening browser 'Chrome' to base url 'https://translate.google.com/'.</msg>
-<arg>https://translate.google.com/</arg>
-<arg>Chrome</arg>
+<msg time="2025-11-11T09:31:50.043843" level="INFO">Opening browser 'Chrome' to base url 'https://the-internet.herokuapp.com/login'.</msg>
+<arg>%{BASE_URL}</arg>
+<arg>${BROWSER}</arg>
+<arg>options=${options}</arg>
 <doc>Opens a new browser instance to the optional ``url``.</doc>
-<status status="PASS" start="2025-06-30T11:16:28.733576" elapsed="1.820780"/>
+<status status="PASS" start="2025-11-11T09:31:50.043523" elapsed="4.475514"/>
 </kw>
-<kw name="Maximize Browser Window" owner="SeleniumLibrary">
-<doc>Maximizes current browser window.</doc>
-<status status="PASS" start="2025-06-30T11:16:30.566632" elapsed="0.846529"/>
+<status status="PASS" start="2025-11-11T09:31:50.041800" elapsed="4.477491"/>
 </kw>
-<kw name="Close All Browsers" owner="SeleniumLibrary" type="TEARDOWN">
-<doc>Closes all open browsers and resets the browser cache.</doc>
-<status status="PASS" start="2025-06-30T11:16:31.414160" elapsed="2.260413"/>
+<kw name="Login To Application" owner="common_keywords">
+<kw name="Input Text" owner="SeleniumLibrary">
+<msg time="2025-11-11T09:31:54.520983" level="INFO">Typing text 'tomsmith' into text field 'id=username'.</msg>
+<arg>${USERNAME_LOCATOR}</arg>
+<arg>${username}</arg>
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2025-11-11T09:31:54.520354" elapsed="0.116193"/>
 </kw>
-<status status="PASS" start="2025-06-30T11:16:28.733576" elapsed="4.940997"/>
+<kw name="Input Text" owner="SeleniumLibrary">
+<msg time="2025-11-11T09:31:54.637148" level="INFO">Typing text 'SuperSecretPassword!' into text field 'id=password'.</msg>
+<arg>${PASSWORD_LOCATOR}</arg>
+<arg>${password}</arg>
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2025-11-11T09:31:54.636791" elapsed="0.103922"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<msg time="2025-11-11T09:31:54.741218" level="INFO">Clicking element 'xpath=//*[@id="login"]/button'.</msg>
+<arg>${LOGIN_BUTTON_LOCATOR}</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="PASS" start="2025-11-11T09:31:54.740927" elapsed="0.678545"/>
+</kw>
+<kw name="Sleep" owner="BuiltIn">
+<msg time="2025-11-11T09:31:57.420069" level="INFO">Slept 2 seconds.</msg>
+<arg>2s</arg>
+<doc>Pauses the test executed for the given time.</doc>
+<status status="PASS" start="2025-11-11T09:31:55.419681" elapsed="2.000577"/>
+</kw>
+<arg>${USERNAME}</arg>
+<arg>${PASSWORD}</arg>
+<status status="PASS" start="2025-11-11T09:31:54.519681" elapsed="2.900744"/>
+</kw>
+<kw name="Get Text" owner="SeleniumLibrary">
+<msg time="2025-11-11T09:31:57.446783" level="INFO">${welcome_text} = You logged into a secure area!
+×</msg>
+<var>${welcome_text}</var>
+<arg>${MESSAGE}</arg>
+<doc>Returns the text value of the element identified by ``locator``.</doc>
+<status status="PASS" start="2025-11-11T09:31:57.420610" elapsed="0.026231"/>
+</kw>
+<kw name="Log To Console" owner="BuiltIn">
+<arg>${welcome_text}</arg>
+<doc>Logs the given message to the console.</doc>
+<status status="PASS" start="2025-11-11T09:31:57.447046" elapsed="0.000267"/>
+</kw>
+<kw name="Element Should Contain" owner="SeleniumLibrary">
+<msg time="2025-11-11T09:31:57.463844" level="INFO">Element 'id=flash' contains text 'You logged into a secure area!'.</msg>
+<arg>${MESSAGE}</arg>
+<arg>You logged into a secure area!</arg>
+<doc>Verifies that element ``locator`` contains text ``expected``.</doc>
+<status status="PASS" start="2025-11-11T09:31:57.447445" elapsed="0.016521"/>
+</kw>
+<kw name="Clear and Quit Browser" type="TEARDOWN">
+<kw name="Close Browser" owner="SeleniumLibrary">
+<doc>Closes the current browser.</doc>
+<status status="PASS" start="2025-11-11T09:31:57.464574" elapsed="0.085899"/>
+</kw>
+<kw name="Sleep" owner="BuiltIn">
+<msg time="2025-11-11T09:31:58.551389" level="INFO">Slept 1 second.</msg>
+<arg>1s</arg>
+<doc>Pauses the test executed for the given time.</doc>
+<status status="PASS" start="2025-11-11T09:31:57.550710" elapsed="1.001128"/>
+</kw>
+<kw name="Cleanup Chrome User Data Directory" owner="browser_options">
+<msg time="2025-11-11T09:31:58.582872" level="INFO">Attempting to cleanup temporary user data directory: /tmp/chrome_profile_7qz7w4ny
+Successfully cleaned up temporary user data directory: /tmp/chrome_profile_7qz7w4ny</msg>
+<status status="PASS" start="2025-11-11T09:31:58.552596" elapsed="0.030439"/>
+</kw>
+<status status="PASS" start="2025-11-11T09:31:57.464280" elapsed="1.118910"/>
+</kw>
+<doc>This test case verifies successful login functionality</doc>
+<status status="PASS" start="2025-11-11T09:31:50.041090" elapsed="8.542191"/>
 </test>
-<status status="PASS" start="2025-06-30T11:16:28.312963" elapsed="5.361610"/>
+<test id="s1-t2" name="Verify Unsuccessful Login" line="23">
+<kw name="Setup test demo" type="SETUP">
+<kw name="Get Chrome Options Object" owner="browser_options">
+<msg time="2025-11-11T09:31:58.585484" level="INFO">Created temporary user data directory: /tmp/chrome_profile_uyzvyahz</msg>
+<msg time="2025-11-11T09:31:58.585648" level="INFO">${options} = &lt;selenium.webdriver.chrome.options.Options object at 0x766d5c60e650&gt;</msg>
+<var>${options}</var>
+<doc>Tạo và trả về một đối tượng ChromeOptions đã cấu hình mạnh mẽ
+để tắt popup lưu mật khẩu và các thông báo khác,
+đặc biệt khi chạy headless trên Linux.</doc>
+<status status="PASS" start="2025-11-11T09:31:58.584734" elapsed="0.000959"/>
+</kw>
+<kw name="Open Browser" owner="SeleniumLibrary">
+<msg time="2025-11-11T09:31:58.586443" level="INFO">Opening browser 'Chrome' to base url 'https://the-internet.herokuapp.com/login'.</msg>
+<arg>%{BASE_URL}</arg>
+<arg>${BROWSER}</arg>
+<arg>options=${options}</arg>
+<doc>Opens a new browser instance to the optional ``url``.</doc>
+<status status="PASS" start="2025-11-11T09:31:58.586047" elapsed="4.582222"/>
+</kw>
+<status status="PASS" start="2025-11-11T09:31:58.584331" elapsed="4.584202"/>
+</kw>
+<kw name="Login To Application" owner="common_keywords">
+<kw name="Input Text" owner="SeleniumLibrary">
+<msg time="2025-11-11T09:32:03.170498" level="INFO">Typing text 'tomsmith' into text field 'id=username'.</msg>
+<arg>${USERNAME_LOCATOR}</arg>
+<arg>${username}</arg>
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2025-11-11T09:32:03.169939" elapsed="0.119790"/>
+</kw>
+<kw name="Input Text" owner="SeleniumLibrary">
+<msg time="2025-11-11T09:32:03.290533" level="INFO">Typing text 'SuperSecretPassword!' into text field 'id=password'.</msg>
+<arg>${PASSWORD_LOCATOR}</arg>
+<arg>${password}</arg>
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2025-11-11T09:32:03.290097" elapsed="0.096705"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<msg time="2025-11-11T09:32:03.387373" level="INFO">Clicking element 'xpath=//*[@id="login"]/button'.</msg>
+<arg>${LOGIN_BUTTON_LOCATOR}</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="PASS" start="2025-11-11T09:32:03.387072" elapsed="0.081195"/>
+</kw>
+<kw name="Sleep" owner="BuiltIn">
+<msg time="2025-11-11T09:32:05.468905" level="INFO">Slept 2 seconds.</msg>
+<arg>2s</arg>
+<doc>Pauses the test executed for the given time.</doc>
+<status status="PASS" start="2025-11-11T09:32:03.468530" elapsed="2.000548"/>
+</kw>
+<arg>${USERNAME}</arg>
+<arg>${PASSWORD}</arg>
+<status status="PASS" start="2025-11-11T09:32:03.169015" elapsed="2.300258"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>xpath=//*[@id="content"]/div/a</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="PASS" start="2025-11-11T09:32:05.469499" elapsed="0.040185"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<msg time="2025-11-11T09:32:05.511058" level="INFO">Clicking element 'xpath=//*[@id="content"]/div/a'.</msg>
+<arg>xpath=//*[@id="content"]/div/a</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="PASS" start="2025-11-11T09:32:05.510080" elapsed="0.091345"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>locator=${MESSAGE}</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="PASS" start="2025-11-11T09:32:05.601661" elapsed="0.021771"/>
+</kw>
+<kw name="Element Should Contain" owner="SeleniumLibrary">
+<msg time="2025-11-11T09:32:05.673488" level="INFO" html="true">&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan="3"&gt;&lt;a href="selenium-screenshot-1.png"&gt;&lt;img src="selenium-screenshot-1.png" width="800px"&gt;&lt;/a&gt;</msg>
+<msg time="2025-11-11T09:32:05.673676" level="FAIL">Element 'id=flash' should have contained text 'You logged out of the secure area!' but its text was 'You logged into a secure area!
+×'.</msg>
+<arg>${MESSAGE}</arg>
+<arg>You logged out of the secure area!</arg>
+<doc>Verifies that element ``locator`` contains text ``expected``.</doc>
+<status status="FAIL" start="2025-11-11T09:32:05.623693" elapsed="0.050672">Element 'id=flash' should have contained text 'You logged out of the secure area!' but its text was 'You logged into a secure area!
+×'.</status>
+</kw>
+<kw name="Clear and Quit Browser" type="TEARDOWN">
+<kw name="Close Browser" owner="SeleniumLibrary">
+<doc>Closes the current browser.</doc>
+<status status="PASS" start="2025-11-11T09:32:05.675081" elapsed="1.081451"/>
+</kw>
+<kw name="Sleep" owner="BuiltIn">
+<msg time="2025-11-11T09:32:07.757320" level="INFO">Slept 1 second.</msg>
+<arg>1s</arg>
+<doc>Pauses the test executed for the given time.</doc>
+<status status="PASS" start="2025-11-11T09:32:06.756770" elapsed="1.000881"/>
+</kw>
+<kw name="Cleanup Chrome User Data Directory" owner="browser_options">
+<msg time="2025-11-11T09:32:07.781583" level="INFO">Attempting to cleanup temporary user data directory: /tmp/chrome_profile_uyzvyahz
+Successfully cleaned up temporary user data directory: /tmp/chrome_profile_uyzvyahz</msg>
+<status status="PASS" start="2025-11-11T09:32:07.758393" elapsed="0.023321"/>
+</kw>
+<status status="PASS" start="2025-11-11T09:32:05.674772" elapsed="2.107278"/>
+</kw>
+<doc>This test case verifies unsuccessful login functionality</doc>
+<status status="FAIL" start="2025-11-11T09:31:58.583748" elapsed="9.198387">Element 'id=flash' should have contained text 'You logged out of the secure area!' but its text was 'You logged into a secure area!
+×'.</status>
+</test>
+<status status="FAIL" start="2025-11-11T09:31:49.608450" elapsed="18.174372"/>
 </suite>
 <statistics>
 <total>
-<stat pass="1" fail="0" skip="0">All Tests</stat>
+<stat pass="1" fail="1" skip="0">All Tests</stat>
 </total>
 <tag>
 </tag>
 <suite>
-<stat name="Testing" id="s1" pass="1" fail="0" skip="0">Testing</stat>
+<stat name="Demo" id="s1" pass="1" fail="1" skip="0">Demo</stat>
 </suite>
 </statistics>
 <errors>

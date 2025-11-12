@@ -1,0 +1,16 @@
+version: '3.8'
+
+# Nơi định nghĩa các "container" của chúng ta
+services:
+  # Bạn có thể đặt tên bất cứ thứ gì bạn muốn ở đây
+  robot-test:
+    
+    # Bảo docker-compose build image từ Dockerfile
+    # trong thư mục hiện tại (dấu chấm .)
+    build: .
+    
+    # Đây chính là cờ -v của bạn
+    volumes:
+      # Ánh xạ thư mục 'results' bên ngoài
+      # vào thư mục '/app/results' bên trong container
+      - ./results:/app/results

@@ -9,7 +9,7 @@ ${PASSWORD_LOCATOR}  id=password
 ${LOGIN_BUTTON_LOCATOR}  xpath=//*[@id="login"]/button
 
 ${BROWSER}  Chrome
-${URL}  https://the-internet.herokuapp.com/login
+# ${URL}  https://the-internet.herokuapp.com/login
 
 ${USERNAME}  tomsmith
 ${PASSWORD}  SuperSecretPassword!
