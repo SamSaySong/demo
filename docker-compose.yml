@@ -1,10 +1,10 @@
-# version: '3.8'
-
 services:
-  # Cấp 2: Tên dịch vụ phải thụt vào 2 khoảng trắng so với 'services:'
+  # Cấp 2: Tên dịch vụ
+  # Phải thụt vào 2 KHOẢNG TRẮNG so với 'services:'
   robot-test:
-    # Cấp 3: Các tùy chọn phải thụt vào 2 khoảng trắng so với 'robot-test:'
+    # Cấp 3: Các tùy chọn
+    # Phải thụt vào 2 KHOẢNG TRẮNG so với 'robot-test:'
     build: .
     volumes:
-      # Phải có dấu gạch ngang '-' trước phần volume
+      # Dấu gạch ngang phải thẳng hàng với 'build'
       - ./results:/app/results
