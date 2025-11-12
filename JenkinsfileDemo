@@ -88,7 +88,10 @@ pipeline {
                         echo "Checking file exists:"
                         if [ -f "${envFile}" ]; then
                             echo "✓ File found"
-                            echo "File size: $(wc -c < ${envFile}) bytes"
+                            
+                            // SỬA DÒNG NÀY: Thêm dấu \ vào trước $(wc...)
+                            echo "File size: \$(wc -c < ${envFile}) bytes" 
+                            
                             echo "Content:"
                             cat ${envFile}
                         else
