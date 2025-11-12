@@ -31,12 +31,35 @@ pipeline {
 
         stage('Debug File Content') {
             steps {
-                echo '=== BẮT ĐẦU NỘI DUNG docker-compose.yml ==='
-                sh 'cat ./docker-compose.yml || true'
-                echo '=== NỘI DUNG staging.env ==='
-                sh 'cat ./staging.env || true'
-                echo '=== NỘI DUNG production.env ==='
-                sh 'cat ./production.env || true'
+                script {
+                    echo '=== 1. KIỂM TRA WORKSPACE JENKINS ==='
+                    sh '''
+                        echo "Current directory: $(pwd)"
+                        echo "List all files:"
+                        ls -la
+                        echo ""
+                        echo "List .env files specifically:"
+                        ls -la *.env 2>/dev/null || echo "No .env files found"
+                    '''
+                    
+                    echo '=== 2. NỘI DUNG docker-compose.yml ==='
+                    sh 'cat ./docker-compose.yml || echo "docker-compose.yml NOT FOUND"'
+                    
+                    echo '=== 3. NỘI DUNG staging.env ==='
+                    sh 'cat ./staging.env || echo "staging.env NOT FOUND"'
+                    
+                    echo '=== 4. NỘI DUNG production.env ==='
+                    sh 'cat ./production.env || echo "production.env NOT FOUND"'
+                    
+                    echo '=== 5. KIỂM TRA GIT STATUS ==='
+                    sh '''
+                        echo "Git status:"
+                        git status || echo "Not a git repo"
+                        echo ""
+                        echo "Git tracked files (*.env):"
+                        git ls-files | grep -E "\.env$" || echo "No .env files in git"
+                    '''
+                }
             }
         }
 
@@ -51,14 +74,47 @@ pipeline {
             }
         }
 
+        stage('Verify Environment Before Build') {
+            steps {
+                script {
+                    def envFile = (params.ENVIRONMENT == 'production') ? 'production.env' : 'staging.env'
+                    echo "=== VERIFYING ENVIRONMENT: ${params.ENVIRONMENT} ==="
+                    
+                    sh """
+                        echo "Selected env file: ${envFile}"
+                        echo ""
+                        echo "Docker command: ${env.COMPOSE_CMD}"
+                        echo ""
+                        echo "Checking file exists:"
+                        if [ -f "${envFile}" ]; then
+                            echo "✓ File found"
+                            echo "File size: $(wc -c < ${envFile}) bytes"
+                            echo "Content:"
+                            cat ${envFile}
+                        else
+                            echo "✗ File NOT found"
+                            exit 1
+                        fi
+                    """
+                }
+            }
+        }
+
         stage('Build Docker Image') {
             steps {
                 script {
                     def envFile = (params.ENVIRONMENT == 'production') ? 'production.env' : 'staging.env'
                     echo "Building images using ${envFile} with ${env.COMPOSE_CMD}"
                     
-                    // DEBUG: List workspace files
-                    sh "echo 'Files in workspace:'; ls -la *.env 2>/dev/null || echo 'No .env files found'"
+                    // DEBUG: Show what we're about to run
+                    sh """
+                        echo "=== BUILD COMMAND ==="
+                        echo "${env.COMPOSE_CMD} --env-file ${envFile} build --pull"
+                        echo ""
+                        echo "=== ENV FILE CHECK ==="
+                        [ -f "${envFile}" ] && echo "✓ ${envFile} exists" || echo "✗ ${envFile} NOT FOUND"
+                        echo ""
+                    """
                     
                     // Use --env-file when available to ensure substitutions are set during build/run
                     sh "${env.COMPOSE_CMD} --env-file ${envFile} build --pull"
@@ -72,16 +128,24 @@ pipeline {
                     def envFile = (params.ENVIRONMENT == 'production') ? 'production.env' : 'staging.env'
                     echo "Running tests on ${params.ENVIRONMENT} using ${envFile}"
                     
-                    // DEBUG: Check if env file exists in workspace
-                    sh "echo 'Checking for env file:'; [ -f ${envFile} ] && echo '✓ ${envFile} found' || echo '✗ ${envFile} NOT FOUND'"
-                    sh "echo 'Content of ${envFile}:'; cat ${envFile} || true"
+                    // DEBUG: Verify env file content before running test
+                    sh """
+                        echo "=== FINAL ENV FILE VERIFICATION ==="
+                        echo "File: ${envFile}"
+                        cat ${envFile}
+                        echo ""
+                        echo "=== DOCKER-COMPOSE CONFIG (substituted) ==="
+                        ${env.COMPOSE_CMD} --env-file ${envFile} config 2>/dev/null || echo "Could not show config"
+                        echo ""
+                    """
 
                     // Run with --exit-code-from so CI picks the test failure exit code
                     // Add --build and --force-recreate to ensure latest image and env are used
                     try {
-                        // Use -e to properly substitute environment variables from the file
                         sh """
-                            echo "Starting docker-compose with: ${env.COMPOSE_CMD} --env-file ${envFile} up"
+                            echo "=== STARTING DOCKER-COMPOSE UP ==="
+                            echo "Command: ${env.COMPOSE_CMD} --env-file ${envFile} up --exit-code-from robot-test --build --force-recreate"
+                            echo ""
                             ${env.COMPOSE_CMD} --env-file ${envFile} up --exit-code-from robot-test --build --force-recreate
                         """
                     } catch (err) {
@@ -89,9 +153,7 @@ pipeline {
                         echo "Error running docker-compose up: ${err}"
                         throw err
                     }
-
                 }
-
             }
         }
 
