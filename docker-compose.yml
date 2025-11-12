@@ -1,4 +1,5 @@
-# Xóa dòng 'version' ở trên cùng
+version: '3.2'
+
 services:
   robot-test:
     build: .
