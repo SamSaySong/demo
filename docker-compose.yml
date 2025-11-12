@@ -1,14 +1,11 @@
-version: '3.2'
 
+
+# Xóa dòng 'version' đi, nó đã lỗi thời và không cần thiết
 services:
-  # Cấp 2: Tên dịch vụ
-  # Phải thụt vào 2 KHOẢNG TRẮNG so với 'services:'
+  # Thụt vào 2 dấu cách
   robot-test:
-    # Cấp 3: Các tùy chọn
-    # Phải thụt vào 2 KHOẢNG TRẮNG so với 'robot-test:'
+    # Thụt vào 4 dấu cách
     build: .
     volumes:
-      # Dấu gạch ngang phải thẳng hàng với 'build'
+      # Thụt vào 6 dấu cách
       - ./results:/app/results
-    # environment:
-    #   - BASE_URL=${BASE_URL}
