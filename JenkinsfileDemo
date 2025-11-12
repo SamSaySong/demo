@@ -18,7 +18,16 @@ pipeline {
                 checkout scm 
             }
         }
-
+        // === THÊM STAGE NÀY VÀO ===
+        stage('Debug File Content') {
+            steps {
+                echo '=== BẮT ĐẦU NỘI DUNG DOCKER-COMPOSE.YML ==='
+                // Lệnh 'cat' sẽ in file ra console
+                sh 'cat ./docker-compose.yml'
+                echo '=== KẾT THÚC NỘI DUNG DOCKER-COMPOSE.YML ==='
+            }
+        }
+        // ============================
         // 4. BUILD IMAGE
         stage('Build Docker Image') {
             steps {
