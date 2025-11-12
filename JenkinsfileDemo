@@ -56,6 +56,10 @@ pipeline {
                 script {
                     def envFile = (params.ENVIRONMENT == 'production') ? 'production.env' : 'staging.env'
                     echo "Building images using ${envFile} with ${env.COMPOSE_CMD}"
+                    
+                    // DEBUG: List workspace files
+                    sh "echo 'Files in workspace:'; ls -la *.env 2>/dev/null || echo 'No .env files found'"
+                    
                     // Use --env-file when available to ensure substitutions are set during build/run
                     sh "${env.COMPOSE_CMD} --env-file ${envFile} build --pull"
                 }
@@ -67,11 +71,19 @@ pipeline {
                 script {
                     def envFile = (params.ENVIRONMENT == 'production') ? 'production.env' : 'staging.env'
                     echo "Running tests on ${params.ENVIRONMENT} using ${envFile}"
+                    
+                    // DEBUG: Check if env file exists in workspace
+                    sh "echo 'Checking for env file:'; [ -f ${envFile} ] && echo '✓ ${envFile} found' || echo '✗ ${envFile} NOT FOUND'"
+                    sh "echo 'Content of ${envFile}:'; cat ${envFile} || true"
 
                     // Run with --exit-code-from so CI picks the test failure exit code
                     // Add --build and --force-recreate to ensure latest image and env are used
                     try {
-                        sh "${env.COMPOSE_CMD} --env-file ${envFile} up --exit-code-from robot-test --build --force-recreate"
+                        // Use -e to properly substitute environment variables from the file
+                        sh """
+                            echo "Starting docker-compose with: ${env.COMPOSE_CMD} --env-file ${envFile} up"
+                            ${env.COMPOSE_CMD} --env-file ${envFile} up --exit-code-from robot-test --build --force-recreate
+                        """
                     } catch (err) {
                         // Ensure we still collect artifacts and then rethrow to mark the build failed
                         echo "Error running docker-compose up: ${err}"

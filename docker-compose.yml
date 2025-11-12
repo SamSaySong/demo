@@ -5,7 +5,11 @@ services:
     build: .
     volumes:
       - ./results:/app/results
-    # Pass environment variables from an .env file into the container
-    # This lets the container see BASE_URL when you run with --env-file staging.env
+    # Load environment from both default and explicit --env-file
+    # This ensures BASE_URL and other vars are available in the container
     environment:
       - BASE_URL=${BASE_URL}
+    # IMPORTANT: Add this to auto-load the correct env file based on context
+    # If you run: docker-compose --env-file staging.env up
+    # Docker will load staging.env AND use it for variable substitution
+    # If running locally without --env-file, you can create a .env file as fallback
