@@ -1,16 +1,10 @@
 # version: '3.8'
 
-# Nơi định nghĩa các "container" của chúng ta
 services:
-  # Bạn có thể đặt tên bất cứ thứ gì bạn muốn ở đây
+  # Cấp 2: Tên dịch vụ phải thụt vào 2 khoảng trắng so với 'services:'
   robot-test:
-    
-    # Bảo docker-compose build image từ Dockerfile
-    # trong thư mục hiện tại (dấu chấm .)
+    # Cấp 3: Các tùy chọn phải thụt vào 2 khoảng trắng so với 'robot-test:'
     build: .
-    
-    # Đây chính là cờ -v của bạn
     volumes:
-      # Ánh xạ thư mục 'results' bên ngoài
-      # vào thư mục '/app/results' bên trong container
+      # Phải có dấu gạch ngang '-' trước phần volume
       - ./results:/app/results
