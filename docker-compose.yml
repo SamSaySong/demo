@@ -1,11 +1,10 @@
-
-
-# Xóa dòng 'version' đi, nó đã lỗi thời và không cần thiết
+# Xóa dòng 'version' ở trên cùng
 services:
-  # Thụt vào 2 dấu cách
   robot-test:
-    # Thụt vào 4 dấu cách
     build: .
     volumes:
-      # Thụt vào 6 dấu cách
       - ./results:/app/results
+    # Pass environment variables from an .env file into the container
+    # This lets the container see BASE_URL when you run with --env-file staging.env
+    environment:
+      - BASE_URL=${BASE_URL}
