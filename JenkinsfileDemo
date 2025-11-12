@@ -57,7 +57,7 @@ pipeline {
                         git status || echo "Not a git repo"
                         echo ""
                         echo "Git tracked files (*.env):"
-                        git ls-files | grep -E "\.env$" || echo "No .env files in git"
+                        git ls-files | grep "\\.env$" || echo "No .env files in git"
                     '''
                 }
             }
