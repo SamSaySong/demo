@@ -10,5 +10,5 @@ services:
     volumes:
       # Dấu gạch ngang phải thẳng hàng với 'build'
       - ./results:/app/results
-    environment:
-      - BASE_URL=${BASE_URL}
+    # environment:
+    #   - BASE_URL=${BASE_URL}
