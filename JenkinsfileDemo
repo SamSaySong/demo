@@ -49,7 +49,7 @@ pipeline {
                 echo 'Archiving Robot Framework reports...'
                 
                 archiveArtifacts artifacts: 'results/log.html, results/report.html, results/output.xml',
-                                 allowEmpty: true
+                                 allowEmptyArchive: true
             }
         }
     } // Dấu đóng của khối 'stages'
