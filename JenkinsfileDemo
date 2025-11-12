@@ -1,29 +1,25 @@
 // Jenkinsfile (Declarative Pipeline)
 
 pipeline {
-    // 1. CHỌN MÁY CHẠY
-    // Yêu cầu: Máy Jenkins này phải được cài đặt Docker và Docker Compose
     agent any
 
     // 2. TẠO LỰA CHỌN MÔI TRƯỜNG
-    // Tạo một menu thả xuống trong Jenkins để bạn chọn "staging" hoặc "production"
     parameters {
         choice(name: 'ENVIRONMENT', 
                choices: ['staging', 'production'], 
                description: 'Chọn môi trường để chạy test')
     }
 
+    // KHỐI STAGES DUY NHẤT
     stages {
         // 3. LẤY CODE TỪ GIT
         stage('Checkout') {
             steps {
-                // Tải code từ kho lưu trữ của bạn (Git, GitHub, v.v.)
                 checkout scm 
             }
         }
 
         // 4. BUILD IMAGE
-        // Tương đương với 'docker build' nhưng qua compose
         stage('Build Docker Image') {
             steps {
                 sh 'docker-compose build'
@@ -34,41 +30,29 @@ pipeline {
         stage('Run Robot Tests') {
             steps {
                 script {
-                    // Mặc định, chúng ta chạy file 'staging.env'
                     def envFile = 'staging.env'
 
-                    // Kiểm tra lựa chọn từ menu
                     if (params.ENVIRONMENT == 'production') {
                         envFile = 'production.env'
                     }
 
                     echo "Running tests on ${params.ENVIRONMENT} using ${envFile}"
 
-                    // Chạy docker-compose
-                    // '--exit-code-from robot-test' là cờ quan trọng:
-                    // Nó sẽ làm cho Jenkins 'fail' nếu test Robot 'fail'
                     sh "docker-compose --env-file ${envFile} up --exit-code-from robot-test"
                 }
             }
         }
-    }
 
-        // 6. XUẤT BẢN REPORT (Mới)
+        // 6. XUẤT BẢN REPORT (ĐÃ ĐƯỢC DI CHUYỂN VÀO ĐÂY)
         stage('Publish Reports') {
             steps {
                 echo 'Archiving Robot Framework reports...'
                 
-                // Lệnh này bảo Jenkins "hãy lưu trữ" các file sau từ thư mục 'results'
-                // Thư mục 'results' là thư mục mà volume đã ánh xạ ra ngoài máy chủ Jenkins
                 archiveArtifacts artifacts: 'results/log.html, results/report.html, results/output.xml',
                                  allowEmpty: true
-
-                // Nếu bạn có cài đặt plugin Robot Framework Plugin:
-                // robot( outputPath: 'results', 
-                //        outputFileName: 'output.xml' )
             }
         }
-    }
+    } // Dấu đóng của khối 'stages'
 
     // 7. DỌN DẸP (Giữ nguyên)
     post {
@@ -76,4 +60,5 @@ pipeline {
             echo "Dọn dẹp container và network..."
             sh 'docker-compose down'
         }
-}
+    }
+} // Dấu đóng của khối 'pipeline'
