@@ -31,6 +31,21 @@ pipeline {
         // 4. BUILD IMAGE
         stage('Build Docker Image') {
             steps {
+                echo "--- KIỂM TRA PHIÊN BẢN DOCKER COMPOSE ---"
+                
+                // Chạy 2 lệnh kiểm tra phiên bản
+                // '|| true' để đảm bảo pipeline không bị fail nếu 1 trong 2 lệnh không tồn tại
+                
+                echo "Đang kiểm tra phiên bản V1 (có gạch nối):"
+                sh 'docker-compose --version || true' 
+                
+                echo "Đang kiểm tra phiên bản V2 (không gạch nối):"
+                sh 'docker compose version || true'
+                
+                echo "--- KẾT THÚC KIỂM TRA PHIÊN BẢN ---"
+
+                // Lệnh build vẫn sẽ chạy (và có thể sẽ fail)
+                echo "Bắt đầu build..."
                 sh 'docker-compose build'
             }
         }
