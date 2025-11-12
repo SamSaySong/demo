@@ -1,4 +1,4 @@
-version: '3.8'
+# version: '3.8'
 
 # Nơi định nghĩa các "container" của chúng ta
 services:
