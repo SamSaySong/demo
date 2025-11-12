@@ -1,183 +1,78 @@
-// Jenkinsfile (Declarative Pipeline)
+// Jenkinsfile (Đã refactor, ngắn gọn và sạch sẽ)
 
 pipeline {
     agent any
 
-    // 2. TẠO LỰA CHỌN MÔI TRƯỜNG
+    // 1. Lựa chọn môi trường (Staging/Production)
     parameters {
         choice(name: 'ENVIRONMENT', 
                choices: ['staging', 'production'], 
                description: 'Chọn môi trường để chạy test')
     }
 
-    options {
-        // Add timestamps to logs for easier debugging
-        timestamps()
-        // Give overall pipeline a reasonable timeout
-        timeout(time: 60, unit: 'MINUTES')
-    }
-
+    // 2. Biến môi trường chung
     environment {
-        // Default compose command; we'll detect the right one at runtime
+        // Đặt lệnh mặc định, sẽ được cập nhật ở stage 'Detect'
         COMPOSE_CMD = 'docker-compose'
     }
 
     stages {
+        // 3. Lấy code
         stage('Checkout') {
             steps {
                 checkout scm
             }
         }
 
-        stage('Debug File Content') {
-            steps {
-                script {
-                    echo '=== 1. KIỂM TRA WORKSPACE JENKINS ==='
-                    sh '''
-                        echo "Current directory: $(pwd)"
-                        echo "List all files:"
-                        ls -la
-                        echo ""
-                        echo "List .env files specifically:"
-                        ls -la *.env 2>/dev/null || echo "No .env files found"
-                    '''
-                    
-                    echo '=== 2. NỘI DUNG docker-compose.yml ==='
-                    sh 'cat ./docker-compose.yml || echo "docker-compose.yml NOT FOUND"'
-                    
-                    echo '=== 3. NỘI DUNG staging.env ==='
-                    sh 'cat ./staging.env || echo "staging.env NOT FOUND"'
-                    
-                    echo '=== 4. NỘI DUNG production.env ==='
-                    sh 'cat ./production.env || echo "production.env NOT FOUND"'
-                    
-                    echo '=== 5. KIỂM TRA GIT STATUS ==='
-                    sh '''
-                        echo "Git status:"
-                        git status || echo "Not a git repo"
-                        echo ""
-                        echo "Git tracked files (*.env):"
-                        git ls-files | grep "\\.env$" || echo "No .env files in git"
-                    '''
-                }
-            }
-        }
-
+        // 4. Phát hiện phiên bản Docker Compose (Tối ưu)
+        // (Giữ lại stage này vì nó RẤT quan trọng để tương thích)
         stage('Detect docker-compose') {
             steps {
                 script {
-                    // Detect whether 'docker compose' (v2) or 'docker-compose' (v1) is available
+                    // Tự động phát hiện V2 (docker compose) hay V1 (docker-compose)
                     def detected = sh(script: "if docker compose version >/dev/null 2>&1; then echo 'docker compose'; elif docker-compose --version >/dev/null 2>&1; then echo 'docker-compose'; else echo 'docker-compose'; fi", returnStdout: true).trim()
                     env.COMPOSE_CMD = detected
-                    echo "Using compose command: ${env.COMPOSE_CMD}"
+                    echo "Sử dụng lệnh: ${env.COMPOSE_CMD}"
                 }
             }
         }
 
-        stage('Verify Environment Before Build') {
+        // 5. Build và Chạy Test (Gộp 2-trong-1)
+        // (Loại bỏ các stage debug lan man)
+        stage('Build & Run Robot Tests') {
             steps {
                 script {
+                    // Chọn file .env dựa trên lựa chọn của bạn
                     def envFile = (params.ENVIRONMENT == 'production') ? 'production.env' : 'staging.env'
-                    echo "=== VERIFYING ENVIRONMENT: ${params.ENVIRONMENT} ==="
                     
-                    sh """
-                        echo "Selected env file: ${envFile}"
-                        echo ""
-                        echo "Docker command: ${env.COMPOSE_CMD}"
-                        echo ""
-                        echo "Checking file exists:"
-                        if [ -f "${envFile}" ]; then
-                            echo "✓ File found"
-                            
-                            // SỬA DÒNG NÀY: Thêm dấu \ vào trước $(wc...)
-                            echo "File size: \$(wc -c < ${envFile}) bytes" 
-                            
-                            echo "Content:"
-                            cat ${envFile}
-                        else
-                            echo "✗ File NOT found"
-                            exit 1
-                        fi
-                    """
+                    echo "Chuẩn bị chạy test trên [${params.ENVIRONMENT}] với file [${envFile}]"
+
+                    // Lệnh sh đơn giản, sạch sẽ, không lỗi cú pháp
+                    // --build: Tự động build lại image nếu Dockerfile thay đổi
+                    // --force-recreate: Buộc tạo container mới (giải quyết lỗi cache)
+                    // --exit-code-from: Lấy mã lỗi từ container 'robot-test'
+                    sh "${env.COMPOSE_CMD} --env-file ${envFile} up --build --force-recreate --exit-code-from robot-test"
                 }
             }
         }
 
-        stage('Build Docker Image') {
-            steps {
-                script {
-                    def envFile = (params.ENVIRONMENT == 'production') ? 'production.env' : 'staging.env'
-                    echo "Building images using ${envFile} with ${env.COMPOSE_CMD}"
-                    
-                    // DEBUG: Show what we're about to run
-                    sh """
-                        echo "=== BUILD COMMAND ==="
-                        echo "${env.COMPOSE_CMD} --env-file ${envFile} build --pull"
-                        echo ""
-                        echo "=== ENV FILE CHECK ==="
-                        [ -f "${envFile}" ] && echo "✓ ${envFile} exists" || echo "✗ ${envFile} NOT FOUND"
-                        echo ""
-                    """
-                    
-                    // Use --env-file when available to ensure substitutions are set during build/run
-                    sh "${env.COMPOSE_CMD} --env-file ${envFile} build --pull"
-                }
-            }
-        }
-
-        stage('Run Robot Tests') {
-            steps {
-                script {
-                    def envFile = (params.ENVIRONMENT == 'production') ? 'production.env' : 'staging.env'
-                    echo "Running tests on ${params.ENVIRONMENT} using ${envFile}"
-                    
-                    // DEBUG: Verify env file content before running test
-                    sh """
-                        echo "=== FINAL ENV FILE VERIFICATION ==="
-                        echo "File: ${envFile}"
-                        cat ${envFile}
-                        echo ""
-                        echo "=== DOCKER-COMPOSE CONFIG (substituted) ==="
-                        ${env.COMPOSE_CMD} --env-file ${envFile} config 2>/dev/null || echo "Could not show config"
-                        echo ""
-                    """
-
-                    // Run with --exit-code-from so CI picks the test failure exit code
-                    // Add --build and --force-recreate to ensure latest image and env are used
-                    try {
-                        sh """
-                            echo "=== STARTING DOCKER-COMPOSE UP ==="
-                            echo "Command: ${env.COMPOSE_CMD} --env-file ${envFile} up --exit-code-from robot-test --build --force-recreate"
-                            echo ""
-                            ${env.COMPOSE_CMD} --env-file ${envFile} up --exit-code-from robot-test --build --force-recreate
-                        """
-                    } catch (err) {
-                        // Ensure we still collect artifacts and then rethrow to mark the build failed
-                        echo "Error running docker-compose up: ${err}"
-                        throw err
-                    }
-                }
-            }
-        }
-
+        // 6. Xuất bản Báo cáo
         stage('Publish Reports') {
             steps {
-                echo 'Archiving Robot Framework reports...'
-                archiveArtifacts artifacts: 'results/log.html, results/report.html, results/output.xml', allowEmptyArchive: true
+                echo 'Đang lưu trữ báo cáo Robot...'
+                archiveArtifacts artifacts: 'results/log.html, results/report.html, results/output.xml', 
+                                 allowEmptyArchive: true
             }
         }
     }
 
+    // 7. Dọn dẹp (Luôn luôn chạy)
     post {
         always {
             script {
-                // Try to use detected compose command to tear down; fallback if it fails.
-                try {
-                    sh "${env.COMPOSE_CMD} down || true"
-                } catch (e) {
-                    echo "Failed to run ${env.COMPOSE_CMD} down: ${e}"
-                    sh 'docker-compose down || true'
-                }
+                echo "Dọn dẹp container và network..."
+                // Dùng '|| true' để đảm bảo không fail pipeline nếu dọn dẹp lỗi
+                sh "${env.COMPOSE_CMD} down || true"
             }
         }
     }
