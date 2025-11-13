@@ -13,9 +13,9 @@ services:
     # ✅ FIX 2: Truyền tất cả variables cần thiết
     environment:
       - BASE_URL=${BASE_URL}
-      - BROWSER=${BROWSER:-chrome}
-      - HEADLESS=${HEADLESS:-true}
-      - ENVIRONMENT=${ENVIRONMENT:-staging}
+      - BROWSER=${BROWSER}
+      - HEADLESS=${HEADLESS}
+      - ENVIRONMENT=${ENVIRONMENT}
     
     # ✅ FIX 3: Thêm shm-size cho Chrome stability
     shm_size: '2gb'
