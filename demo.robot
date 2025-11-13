@@ -1,4 +1,5 @@
 ***Settings***
+Library    OperatingSystem
 Library    SeleniumLibrary
 Resource    common_keywords.robot
 Variables    variables/data_reader.py
@@ -50,6 +51,6 @@ Setup test demo
     # Create Webdriver    driver_name    ${BROWSER}    options=${options}
     # Open Browser    ${URL}    ${BROWSER}    options=${options}
 
-    Open Browser    ${ENV:BASE_URL}    ${BROWSER}    options=${options}
+    Open Browser    %{BASE_URL}    ${BROWSER}    options=${options}
    
     

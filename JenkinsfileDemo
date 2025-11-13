@@ -1,79 +1,117 @@
-// Jenkinsfile (Đã refactor, ngắn gọn và sạch sẽ)
-
 pipeline {
     agent any
 
-    // 1. Lựa chọn môi trường (Staging/Production)
     parameters {
         choice(name: 'ENVIRONMENT', 
                choices: ['staging', 'production'], 
                description: 'Chọn môi trường để chạy test')
     }
 
-    // 2. Biến môi trường chung
     environment {
-        // Đặt lệnh mặc định, sẽ được cập nhật ở stage 'Detect'
         COMPOSE_CMD = 'docker-compose'
     }
 
     stages {
-        // 3. Lấy code
         stage('Checkout') {
             steps {
                 checkout scm
             }
         }
 
-        // 4. Phát hiện phiên bản Docker Compose (Tối ưu)
-        // (Giữ lại stage này vì nó RẤT quan trọng để tương thích)
         stage('Detect docker-compose') {
             steps {
                 script {
-                    // Tự động phát hiện V2 (docker compose) hay V1 (docker-compose)
-                    def detected = sh(script: "if docker compose version >/dev/null 2>&1; then echo 'docker compose'; elif docker-compose --version >/dev/null 2>&1; then echo 'docker-compose'; else echo 'docker-compose'; fi", returnStdout: true).trim()
+                    def detected = sh(
+                        script: """
+                            if docker compose version >/dev/null 2>&1; then 
+                                echo 'docker compose'
+                            elif docker-compose --version >/dev/null 2>&1; then 
+                                echo 'docker-compose'
+                            else 
+                                echo 'docker-compose'
+                            fi
+                        """, 
+                        returnStdout: true
+                    ).trim()
                     env.COMPOSE_CMD = detected
-                    echo "Sử dụng lệnh: ${env.COMPOSE_CMD}"
+                    echo "✅ Sử dụng lệnh: ${env.COMPOSE_CMD}"
                 }
             }
         }
 
-        // 5. Build và Chạy Test (Gộp 2-trong-1)
-        // (Loại bỏ các stage debug lan man)
+        // ✅ FIX: Stage mới để validate env file
+        stage('Validate Environment') {
+            steps {
+                script {
+                    def envFile = (params.ENVIRONMENT == 'production') ? 'production.env' : 'staging.env'
+                    
+                    echo "📋 Kiểm tra file môi trường: ${envFile}"
+                    
+                    // Check file exists
+                    if (!fileExists(envFile)) {
+                        error("❌ File ${envFile} không tồn tại!")
+                    }
+                    
+                    // Show content for debugging
+                    sh "echo '📄 Nội dung ${envFile}:' && cat ${envFile}"
+                }
+            }
+        }
+
         stage('Build & Run Robot Tests') {
             steps {
                 script {
-                    // Chọn file .env dựa trên lựa chọn của bạn
                     def envFile = (params.ENVIRONMENT == 'production') ? 'production.env' : 'staging.env'
                     
-                    echo "Chuẩn bị chạy test trên [${params.ENVIRONMENT}] với file [${envFile}]"
+                    echo "🚀 Chạy test trên [${params.ENVIRONMENT}] với file [${envFile}]"
 
-                    // Lệnh sh đơn giản, sạch sẽ, không lỗi cú pháp
-                    // --build: Tự động build lại image nếu Dockerfile thay đổi
-                    // --force-recreate: Buộc tạo container mới (giải quyết lỗi cache)
-                    // --exit-code-from: Lấy mã lỗi từ container 'robot-test'
-                    sh "${env.COMPOSE_CMD} --env-file ${envFile} up --build --force-recreate --exit-code-from robot-test"
+                    // ✅ FIX: Truyền ENV_FILE để docker-compose.yml nhận được
+                    sh """
+                        export ENV_FILE=${envFile}
+                        ${env.COMPOSE_CMD} --env-file ${envFile} \
+                            up --build --force-recreate \
+                            --abort-on-container-exit \
+                            --exit-code-from robot-test
+                    """
                 }
             }
         }
 
-        // 6. Xuất bản Báo cáo
         stage('Publish Reports') {
             steps {
-                echo 'Đang lưu trữ báo cáo Robot...'
-                archiveArtifacts artifacts: 'results/log.html, results/report.html, results/output.xml', 
+                echo '📊 Đang lưu trữ báo cáo Robot...'
+                
+                // ✅ FIX: Publish Robot Framework reports với plugin
+                robot(
+                    outputPath: 'results',
+                    outputFileName: 'output.xml',
+                    reportFileName: 'report.html',
+                    logFileName: 'log.html',
+                    passThreshold: 80.0,
+                    unstableThreshold: 70.0
+                )
+                
+                // Backup: Archive artifacts
+                archiveArtifacts artifacts: 'results/*.html, results/*.xml', 
                                  allowEmptyArchive: true
             }
         }
     }
 
-    // 7. Dọn dẹp (Luôn luôn chạy)
     post {
         always {
             script {
-                echo "Dọn dẹp container và network..."
-                // Dùng '|| true' để đảm bảo không fail pipeline nếu dọn dẹp lỗi
-                sh "${env.COMPOSE_CMD} down || true"
+                echo "🧹 Dọn dẹp container và network..."
+                sh "${env.COMPOSE_CMD} down -v || true"
             }
+        }
+        
+        success {
+            echo "✅ Pipeline thành công!"
+        }
+        
+        failure {
+            echo "❌ Pipeline thất bại! Kiểm tra logs."
         }
     }
 }

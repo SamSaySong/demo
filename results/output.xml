@@ -1,93 +1,189 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<robot generator="Robot 7.3.2 (Python 3.10.4 on linux)" generated="2025-11-12T09:19:32.110095" rpa="false" schemaversion="5">
+<robot generator="Robot 7.3.2 (Python 3.10.4 on linux)" generated="2025-11-13T01:25:00.138888" rpa="false" schemaversion="5">
 <suite id="s1" name="Demo" source="/app/demo.robot">
-<test id="s1-t1" name="Verify Successful Login" line="11">
+<test id="s1-t1" name="Verify Successful Login" line="12">
 <kw name="Setup test demo" type="SETUP">
 <kw name="Get Chrome Options Object" owner="browser_options">
-<msg time="2025-11-12T09:19:32.664089" level="INFO">Created temporary user data directory: /tmp/chrome_profile_n7__xsi4</msg>
-<msg time="2025-11-12T09:19:32.664246" level="INFO">${options} = &lt;selenium.webdriver.chrome.options.Options object at 0x7f9209500e50&gt;</msg>
+<msg time="2025-11-13T01:25:01.366938" level="INFO">Created temporary user data directory: /tmp/chrome_profile_ek4zqarm</msg>
+<msg time="2025-11-13T01:25:01.367064" level="INFO">${options} = &lt;selenium.webdriver.chrome.options.Options object at 0x7a064819ca30&gt;</msg>
 <var>${options}</var>
 <doc>Tạo và trả về một đối tượng ChromeOptions đã cấu hình mạnh mẽ
 để tắt popup lưu mật khẩu và các thông báo khác,
 đặc biệt khi chạy headless trên Linux.</doc>
-<status status="PASS" start="2025-11-12T09:19:32.663455" elapsed="0.000825"/>
+<status status="PASS" start="2025-11-13T01:25:01.366154" elapsed="0.000946"/>
 </kw>
 <kw name="Open Browser" owner="SeleniumLibrary">
-<msg time="2025-11-12T09:19:32.665887" level="FAIL">Variable '${BASE_URL}' not found.</msg>
-<arg>${BASE_URL}</arg>
+<msg time="2025-11-13T01:25:01.367654" level="INFO">Opening browser 'Chrome' to base url 'https://docs.saucelabs.com/basics/test-config-annotation/test-annotation/'.</msg>
+<arg>%{BASE_URL}</arg>
 <arg>${BROWSER}</arg>
 <arg>options=${options}</arg>
 <doc>Opens a new browser instance to the optional ``url``.</doc>
-<status status="FAIL" start="2025-11-12T09:19:32.665265" elapsed="0.000671">Variable '${BASE_URL}' not found.</status>
+<status status="PASS" start="2025-11-13T01:25:01.367272" elapsed="7.431440"/>
 </kw>
-<status status="FAIL" start="2025-11-12T09:19:32.662720" elapsed="0.003348">Variable '${BASE_URL}' not found.</status>
+<status status="PASS" start="2025-11-13T01:25:01.365142" elapsed="7.433876"/>
+</kw>
+<kw name="Login To Application" owner="common_keywords">
+<kw name="Input Text" owner="SeleniumLibrary">
+<msg time="2025-11-13T01:25:08.803218" level="INFO">Typing text 'tomsmith' into text field 'id=username'.</msg>
+<msg time="2025-11-13T01:25:08.888979" level="INFO" html="true">&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan="3"&gt;&lt;a href="selenium-screenshot-2.png"&gt;&lt;img src="selenium-screenshot-2.png" width="800px"&gt;&lt;/a&gt;</msg>
+<msg time="2025-11-13T01:25:08.889287" level="FAIL">Element with locator 'id=username' not found.</msg>
+<arg>${USERNAME_LOCATOR}</arg>
+<arg>${username}</arg>
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<status status="FAIL" start="2025-11-13T01:25:08.801926" elapsed="0.091778">Element with locator 'id=username' not found.</status>
+</kw>
+<kw name="Input Text" owner="SeleniumLibrary">
+<arg>${PASSWORD_LOCATOR}</arg>
+<arg>${password}</arg>
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<status status="NOT RUN" start="2025-11-13T01:25:08.893975" elapsed="0.000046"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<arg>${LOGIN_BUTTON_LOCATOR}</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="NOT RUN" start="2025-11-13T01:25:08.894141" elapsed="0.000031"/>
+</kw>
+<kw name="Sleep" owner="BuiltIn">
+<arg>2s</arg>
+<doc>Pauses the test executed for the given time.</doc>
+<status status="NOT RUN" start="2025-11-13T01:25:08.894271" elapsed="0.000028"/>
+</kw>
+<arg>${USERNAME}</arg>
+<arg>${PASSWORD}</arg>
+<status status="FAIL" start="2025-11-13T01:25:08.799457" elapsed="0.094988">Element with locator 'id=username' not found.</status>
+</kw>
+<kw name="Get Text" owner="SeleniumLibrary">
+<var>${welcome_text}</var>
+<arg>${MESSAGE}</arg>
+<doc>Returns the text value of the element identified by ``locator``.</doc>
+<status status="NOT RUN" start="2025-11-13T01:25:08.894586" elapsed="0.000033"/>
+</kw>
+<kw name="Log To Console" owner="BuiltIn">
+<arg>${welcome_text}</arg>
+<doc>Logs the given message to the console.</doc>
+<status status="NOT RUN" start="2025-11-13T01:25:08.894722" elapsed="0.000029"/>
+</kw>
+<kw name="Element Should Contain" owner="SeleniumLibrary">
+<arg>${MESSAGE}</arg>
+<arg>You logged into a secure area!</arg>
+<doc>Verifies that element ``locator`` contains text ``expected``.</doc>
+<status status="NOT RUN" start="2025-11-13T01:25:08.894849" elapsed="0.000029"/>
 </kw>
 <kw name="Clear and Quit Browser" type="TEARDOWN">
 <kw name="Close Browser" owner="SeleniumLibrary">
 <doc>Closes the current browser.</doc>
-<status status="PASS" start="2025-11-12T09:19:32.666709" elapsed="0.000206"/>
+<status status="PASS" start="2025-11-13T01:25:08.895649" elapsed="0.169544"/>
 </kw>
 <kw name="Sleep" owner="BuiltIn">
-<msg time="2025-11-12T09:19:33.667359" level="INFO">Slept 1 second.</msg>
+<msg time="2025-11-13T01:25:10.066240" level="INFO">Slept 1 second.</msg>
 <arg>1s</arg>
 <doc>Pauses the test executed for the given time.</doc>
-<status status="PASS" start="2025-11-12T09:19:32.667028" elapsed="1.000464"/>
+<status status="PASS" start="2025-11-13T01:25:09.065430" elapsed="1.001136"/>
 </kw>
 <kw name="Cleanup Chrome User Data Directory" owner="browser_options">
-<msg time="2025-11-12T09:19:33.667992" level="INFO">Attempting to cleanup temporary user data directory: /tmp/chrome_profile_n7__xsi4
-Successfully cleaned up temporary user data directory: /tmp/chrome_profile_n7__xsi4</msg>
-<status status="PASS" start="2025-11-12T09:19:33.667681" elapsed="0.000371"/>
+<msg time="2025-11-13T01:25:10.090534" level="INFO">Attempting to cleanup temporary user data directory: /tmp/chrome_profile_ek4zqarm
+Successfully cleaned up temporary user data directory: /tmp/chrome_profile_ek4zqarm</msg>
+<status status="PASS" start="2025-11-13T01:25:10.067267" elapsed="0.023395"/>
 </kw>
-<status status="PASS" start="2025-11-12T09:19:32.666403" elapsed="1.001748"/>
+<status status="PASS" start="2025-11-13T01:25:08.895204" elapsed="1.195603"/>
 </kw>
 <doc>This test case verifies successful login functionality</doc>
-<status status="FAIL" start="2025-11-12T09:19:32.662008" elapsed="1.006211">Setup failed:
-Variable '${BASE_URL}' not found.</status>
+<status status="FAIL" start="2025-11-13T01:25:01.364321" elapsed="8.726565">Element with locator 'id=username' not found.</status>
 </test>
-<test id="s1-t2" name="Verify Unsuccessful Login" line="23">
+<test id="s1-t2" name="Verify Unsuccessful Login" line="24">
 <kw name="Setup test demo" type="SETUP">
 <kw name="Get Chrome Options Object" owner="browser_options">
-<msg time="2025-11-12T09:19:33.669961" level="INFO">Created temporary user data directory: /tmp/chrome_profile_i01ah471</msg>
-<msg time="2025-11-12T09:19:33.670086" level="INFO">${options} = &lt;selenium.webdriver.chrome.options.Options object at 0x7f92095010f0&gt;</msg>
+<msg time="2025-11-13T01:25:10.093009" level="INFO">Created temporary user data directory: /tmp/chrome_profile_axrna8ej</msg>
+<msg time="2025-11-13T01:25:10.093169" level="INFO">${options} = &lt;selenium.webdriver.chrome.options.Options object at 0x7a064819f490&gt;</msg>
 <var>${options}</var>
 <doc>Tạo và trả về một đối tượng ChromeOptions đã cấu hình mạnh mẽ
 để tắt popup lưu mật khẩu và các thông báo khác,
 đặc biệt khi chạy headless trên Linux.</doc>
-<status status="PASS" start="2025-11-12T09:19:33.669275" elapsed="0.000843"/>
+<status status="PASS" start="2025-11-13T01:25:10.092131" elapsed="0.001079"/>
 </kw>
 <kw name="Open Browser" owner="SeleniumLibrary">
-<msg time="2025-11-12T09:19:33.670900" level="FAIL">Variable '${BASE_URL}' not found.</msg>
-<arg>${BASE_URL}</arg>
+<msg time="2025-11-13T01:25:10.094624" level="INFO">Opening browser 'Chrome' to base url 'https://docs.saucelabs.com/basics/test-config-annotation/test-annotation/'.</msg>
+<arg>%{BASE_URL}</arg>
 <arg>${BROWSER}</arg>
 <arg>options=${options}</arg>
 <doc>Opens a new browser instance to the optional ``url``.</doc>
-<status status="FAIL" start="2025-11-12T09:19:33.670293" elapsed="0.000654">Variable '${BASE_URL}' not found.</status>
+<status status="PASS" start="2025-11-13T01:25:10.093461" elapsed="4.011336"/>
 </kw>
-<status status="FAIL" start="2025-11-12T09:19:33.668986" elapsed="0.002086">Variable '${BASE_URL}' not found.</status>
+<status status="PASS" start="2025-11-13T01:25:10.091797" elapsed="4.013327"/>
+</kw>
+<kw name="Login To Application" owner="common_keywords">
+<kw name="Input Text" owner="SeleniumLibrary">
+<msg time="2025-11-13T01:25:14.107783" level="INFO">Typing text 'tomsmith' into text field 'id=username'.</msg>
+<msg time="2025-11-13T01:25:14.211310" level="INFO" html="true">&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan="3"&gt;&lt;a href="selenium-screenshot-3.png"&gt;&lt;img src="selenium-screenshot-3.png" width="800px"&gt;&lt;/a&gt;</msg>
+<msg time="2025-11-13T01:25:14.211517" level="FAIL">Element with locator 'id=username' not found.</msg>
+<arg>${USERNAME_LOCATOR}</arg>
+<arg>${username}</arg>
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<status status="FAIL" start="2025-11-13T01:25:14.107341" elapsed="0.104381">Element with locator 'id=username' not found.</status>
+</kw>
+<kw name="Input Text" owner="SeleniumLibrary">
+<arg>${PASSWORD_LOCATOR}</arg>
+<arg>${password}</arg>
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<status status="NOT RUN" start="2025-11-13T01:25:14.211947" elapsed="0.000046"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<arg>${LOGIN_BUTTON_LOCATOR}</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="NOT RUN" start="2025-11-13T01:25:14.212137" elapsed="0.000037"/>
+</kw>
+<kw name="Sleep" owner="BuiltIn">
+<arg>2s</arg>
+<doc>Pauses the test executed for the given time.</doc>
+<status status="NOT RUN" start="2025-11-13T01:25:14.212291" elapsed="0.000033"/>
+</kw>
+<arg>${USERNAME}</arg>
+<arg>${PASSWORD}</arg>
+<status status="FAIL" start="2025-11-13T01:25:14.106657" elapsed="0.105802">Element with locator 'id=username' not found.</status>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>xpath=//*[@id="content"]/div/a</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="NOT RUN" start="2025-11-13T01:25:14.212606" elapsed="0.000035"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<arg>xpath=//*[@id="content"]/div/a</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="NOT RUN" start="2025-11-13T01:25:14.213100" elapsed="0.000038"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>locator=${MESSAGE}</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="NOT RUN" start="2025-11-13T01:25:14.213258" elapsed="0.000033"/>
+</kw>
+<kw name="Element Should Contain" owner="SeleniumLibrary">
+<arg>${MESSAGE}</arg>
+<arg>You logged out of the secure area!</arg>
+<doc>Verifies that element ``locator`` contains text ``expected``.</doc>
+<status status="NOT RUN" start="2025-11-13T01:25:14.213407" elapsed="0.000053"/>
 </kw>
 <kw name="Clear and Quit Browser" type="TEARDOWN">
 <kw name="Close Browser" owner="SeleniumLibrary">
 <doc>Closes the current browser.</doc>
-<status status="PASS" start="2025-11-12T09:19:33.671710" elapsed="0.000147"/>
+<status status="PASS" start="2025-11-13T01:25:14.214140" elapsed="0.153691"/>
 </kw>
 <kw name="Sleep" owner="BuiltIn">
-<msg time="2025-11-12T09:19:34.672385" level="INFO">Slept 1 second.</msg>
+<msg time="2025-11-13T01:25:15.369651" level="INFO">Slept 1 second.</msg>
 <arg>1s</arg>
 <doc>Pauses the test executed for the given time.</doc>
-<status status="PASS" start="2025-11-12T09:19:33.671973" elapsed="1.000639"/>
+<status status="PASS" start="2025-11-13T01:25:14.368660" elapsed="1.001137"/>
 </kw>
 <kw name="Cleanup Chrome User Data Directory" owner="browser_options">
-<msg time="2025-11-12T09:19:34.673318" level="INFO">Attempting to cleanup temporary user data directory: /tmp/chrome_profile_i01ah471
-Successfully cleaned up temporary user data directory: /tmp/chrome_profile_i01ah471</msg>
-<status status="PASS" start="2025-11-12T09:19:34.672897" elapsed="0.000508"/>
+<msg time="2025-11-13T01:25:15.388271" level="INFO">Attempting to cleanup temporary user data directory: /tmp/chrome_profile_axrna8ej
+Successfully cleaned up temporary user data directory: /tmp/chrome_profile_axrna8ej</msg>
+<status status="PASS" start="2025-11-13T01:25:15.370008" elapsed="0.018419"/>
 </kw>
-<status status="PASS" start="2025-11-12T09:19:33.671414" elapsed="1.002105"/>
+<status status="PASS" start="2025-11-13T01:25:14.213815" elapsed="1.174756"/>
 </kw>
 <doc>This test case verifies unsuccessful login functionality</doc>
-<status status="FAIL" start="2025-11-12T09:19:33.668555" elapsed="1.005048">Setup failed:
-Variable '${BASE_URL}' not found.</status>
+<status status="FAIL" start="2025-11-13T01:25:10.091271" elapsed="5.297379">Element with locator 'id=username' not found.</status>
 </test>
-<status status="FAIL" start="2025-11-12T09:19:32.112828" elapsed="2.561508"/>
+<status status="FAIL" start="2025-11-13T01:25:00.141206" elapsed="15.248308"/>
 </suite>
 <statistics>
 <total>

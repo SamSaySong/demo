@@ -1,15 +1,24 @@
-version: '3.2'
+# version: '3.8'
 
 services:
   robot-test:
     build: .
     volumes:
       - ./results:/app/results
-    # Load environment from both default and explicit --env-file
-    # This ensures BASE_URL and other vars are available in the container
+    
+    # # ✅ FIX 1: Thêm env_file để auto-load từ file được chỉ định
+    # env_file:
+    #   - ${ENV_FILE:-.env}  # Default to .env if ENV_FILE not set
+    
+    # ✅ FIX 2: Truyền tất cả variables cần thiết
     environment:
       - BASE_URL=${BASE_URL}
-    # IMPORTANT: Add this to auto-load the correct env file based on context
-    # If you run: docker-compose --env-file staging.env up
-    # Docker will load staging.env AND use it for variable substitution
-    # If running locally without --env-file, you can create a .env file as fallback
+      - BROWSER=${BROWSER:-chrome}
+      - HEADLESS=${HEADLESS:-true}
+      - ENVIRONMENT=${ENVIRONMENT:-staging}
+    
+    # ✅ FIX 3: Thêm shm-size cho Chrome stability
+    shm_size: '2gb'
+    
+    # ✅ FIX 4: Network mode nếu cần truy cập localhost
+    # network_mode: "host"  # Uncomment if needed
